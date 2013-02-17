@@ -14,10 +14,11 @@
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 
+long i = 0;
 int main()
 {
-    int i = 0;
-    int number = 0;
+    long i = 0;
+    //int number = 0;
 
     LATBbits.LATB4=0;
     LATAbits.LATA4=0;
@@ -28,6 +29,14 @@ int main()
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
 
+    T1CON = 0;
+    T1CONbits.TCKPS = 1;
+    PR1 = 50000;
+
+    _T1IP = 1;
+    _T1IF = 0;
+    _T1IE = 1;
+    T1CONbits.TON = 1;
 
     /*
     // Configure PLL prescaler, PLL postscaler, PLL divisor
@@ -53,7 +62,7 @@ int main()
     while(1)
     {
         i=0;
-        while(i<30000) {
+        while(i<80000) {
             LATBbits.LATB4 = 1;
             LATAbits.LATA4 = 1;
             i++;
@@ -61,7 +70,7 @@ int main()
 
 
         i = 0; 
-        while(i<30000) {
+        while(i<70000) {
             LATBbits.LATB4 = 0;
             LATAbits.LATA4 = 0;
             i++;
@@ -74,3 +83,26 @@ int main()
 
 
 }
+
+
+
+
+void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
+{
+        i=0;
+        while(i<80000) {
+            LATBbits.LATB4 = 1;
+            LATAbits.LATA4 = 1;
+            i++;
+        }
+
+
+        i = 0; 
+        while(i<70000) {
+            LATBbits.LATB4 = 0;
+            LATAbits.LATA4 = 0;
+            i++;
+        }
+
+}
+
