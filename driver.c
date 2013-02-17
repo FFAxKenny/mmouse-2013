@@ -61,20 +61,6 @@ int main()
 
     while(1)
     {
-        i=0;
-        while(i<80000) {
-            LATBbits.LATB4 = 1;
-            LATAbits.LATA4 = 1;
-            i++;
-        }
-
-
-        i = 0; 
-        while(i<70000) {
-            LATBbits.LATB4 = 0;
-            LATAbits.LATA4 = 0;
-            i++;
-        }
 
     }
     while(1);
