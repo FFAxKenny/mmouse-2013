@@ -29,15 +29,22 @@ int main()
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
 
-    T1CON = 0;
-    T1CONbits.TCKPS = 3;
-    PR1 = 50000;
+ 
+    /********************************
+     *      Timer1 Configuration
+     ********************************/
+    T1CON = 0;               // Reset T1 Configuration
+    T1CONbits.TCKPS = 3;     // Set the ratio to the highest
+    PR1 = 50000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
     _T1IE = 1;
-    T1CONbits.TON = 1;
+    T1CONbits.TON = 1;       // Enable Timer
 
+    /********************************
+     *      PLL Configuration
+     ********************************/
     // Configure PLL prescaler, PLL postscaler, PLL divisor
     PLLFBD=63;              // M=65
     CLKDIVbits.PLLPOST=0;   // N2=2
@@ -47,20 +54,27 @@ int main()
     __builtin_write_OSCCONH(0x01);
     __builtin_write_OSCCONL(OSCCON | 0x01);
 
-    /*
-    // Wait for Clock switch to occur
-    while (OSCCONbits.COSC!= 0b001);
-    
 
-    // Wait for PLL to lock
-    while (OSCCONbits.LOCK!= 1);
-    */
-    
+    // This bit of code doesn't work for some reason..
+    /**************************************
+        // Wait for Clock switch to occur
+        while (OSCCONbits.COSC!= 0b001);
+        
+
+        // Wait for PLL to lock
+        while (OSCCONbits.LOCK!= 1);
+    ***************************************/
+
+
+    /********************************
+     *      Main Body
+     ********************************/
+
     while(1)
     {
-            __delay32(5000000);
+            __delay32(50000);
             LATAbits.LATA4 = 1;
-            __delay32(5000000);
+            __delay32(50000);
             LATAbits.LATA4 = 0;
     }
 
@@ -70,19 +84,10 @@ int main()
 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
-        _T1IF = 0;
-        i=0;
-        while(i<80000) {
-            LATBbits.LATB4 = 1;
-            i++;
-        }
-
-
-        i = 0; 
-        while(i<70000) {
-            LATBbits.LATB4 = 0;
-            i++;
-        }
+        
+        _T1IF = 0;      // Reset the timer flag
+        
+        // The body of the Timer1 Interrupt goes here
 
 }
 
