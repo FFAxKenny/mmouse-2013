@@ -30,7 +30,7 @@ int main()
     TRISB = 0b00000000;      // Configure B Ports as output
 
     T1CON = 0;
-    T1CONbits.TCKPS = 1;
+    T1CONbits.TCKPS = 3;
     PR1 = 50000;
 
     _T1IP = 1;
@@ -38,7 +38,6 @@ int main()
     _T1IE = 1;
     T1CONbits.TON = 1;
 
-    /*
     // Configure PLL prescaler, PLL postscaler, PLL divisor
     PLLFBD=63;              // M=65
     CLKDIVbits.PLLPOST=0;   // N2=2
@@ -48,9 +47,7 @@ int main()
     __builtin_write_OSCCONH(0x01);
     __builtin_write_OSCCONL(OSCCON | 0x01);
 
-    LATBbits.LATB4=1;
-    LATAbits.LATA4=1;
-
+    /*
     // Wait for Clock switch to occur
     while (OSCCONbits.COSC!= 0b001);
     
@@ -58,27 +55,25 @@ int main()
     // Wait for PLL to lock
     while (OSCCONbits.LOCK!= 1);
     */
-
+    
     while(1)
     {
-
+            __delay32(5000000);
+            LATAbits.LATA4 = 1;
+            __delay32(5000000);
+            LATAbits.LATA4 = 0;
     }
-    while(1);
-
 
 
 
 }
 
-
-
-
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
+        _T1IF = 0;
         i=0;
         while(i<80000) {
             LATBbits.LATB4 = 1;
-            LATAbits.LATA4 = 1;
             i++;
         }
 
@@ -86,7 +81,6 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         i = 0; 
         while(i<70000) {
             LATBbits.LATB4 = 0;
-            LATAbits.LATA4 = 0;
             i++;
         }
 
