@@ -23,6 +23,7 @@ int main()
     LATBbits.LATB4=0;
     LATAbits.LATA4=0;
 
+    
     ANSELA = 0;//configures pin B4 as digital
     ANSELB = 0;//configures pin B4 as digital
 
