@@ -18,10 +18,13 @@ long i = 0;
 int main()
 {
     long i = 0;
+    long k = 40000;
     //int number = 0;
 
-    LATBbits.LATB4=0;
-    LATAbits.LATA4=0;
+    LATBbits.LATB9=1;
+    LATBbits.LATB6=1;
+    LATBbits.LATB5=1;
+    LATAbits.LATA4=1;
 
     
     ANSELA = 0;//configures pin B4 as digital
@@ -70,13 +73,18 @@ int main()
     /********************************
      *      Main Body
      ********************************/
-
+  
     while(1)
     {
-            __delay32(50000);
-            LATAbits.LATA4 = 1;
-            __delay32(50000);
-            LATAbits.LATA4 = 0;
+
+            __delay32(k);
+            LATBbits.LATB9 = 1;
+            LATBbits.LATB8 = 1;
+            __delay32(k);
+            LATBbits.LATB9 = 0;
+            LATBbits.LATB8 = 0;
+            if(k>10000)
+                k=k-100;
     }
 
 
