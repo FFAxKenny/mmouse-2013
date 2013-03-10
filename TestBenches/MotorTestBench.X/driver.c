@@ -17,6 +17,8 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 long i = 0;
 int motor_pulse = 0;
 int test;
+int timer_skip;
+
 int main()
 {
     long k = 40000;
@@ -59,38 +61,29 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
 
-        if(motor_pulse==0)
-            motor_pulse=1;
-        else
-            motor_pulse=0;
-
+        motor_pulse=!motor_pulse;
         LATBbits.LATB9 = motor_pulse;
         LATBbits.LATB8 = motor_pulse;
         
-        if(PR1 > 3000)
+        // First Acceleration
+        if(PR1 > 3000){
             PR1 = PR1 - 4;             // Set the timer
-
-        /*
-        else if(PR1 > 700)
-        {
+        }
+        // Second Acceleration
+        else if(PR1 > 700){
             PR1 = PR1 - 1;
         }
-        else if(PR1 > 300)
-        {
-            if( test == 500 )
-            {
+        // Third Acceleration
+        else if(PR1 > 300){
+            if( timer_skip == 500 ){
                 PR1 = PR1-1;
-                test = 0;
+                timer_skip = 0;
             }
-            else
-            {
-                test++;
+            else{
+                timer_skip++;
             }
         }
-         */
          
-
-        // The body of the Timer1 Interrupt goes here
 
 }
 
