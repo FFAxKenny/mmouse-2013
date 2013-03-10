@@ -20,7 +20,6 @@ int test;
 int main()
 {
     long k = 40000;
-    //int number = 0;
 
     LATBbits.LATB9=1;
     LATBbits.LATB6=1;
@@ -40,57 +39,15 @@ int main()
   
     while(1)
     {
-        /*
-            __delay32(k);
-            LATBbits.LATB9 = 1;
-            LATBbits.LATB8 = 1;
-            __delay32(k);
-            LATBbits.LATB9 = 0;
-            LATBbits.LATB8 = 0;
-            if(k>10000) k=k-100;
-         */
+        // Don't do anything since we're running interrupts
     }
-
-
 
 }
 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
-
-        if(motor_pulse==0)
-            motor_pulse=1;
-        else
-            motor_pulse=0;
-
-        LATBbits.LATB9 = motor_pulse;
-        LATBbits.LATB8 = motor_pulse;
-        
-        if(PR1 > 3000)
-            PR1 = PR1 - 4;             // Set the timer
-
-        /*
-        else if(PR1 > 700)
-        {
-            PR1 = PR1 - 1;
-        }
-        else if(PR1 > 300)
-        {
-            if( test == 500 )
-            {
-                PR1 = PR1-1;
-                test = 0;
-            }
-            else
-            {
-                test++;
-            }
-        }
-         */
-         
-
-        // The body of the Timer1 Interrupt goes here
+        // Main ISR
 
 }
 
