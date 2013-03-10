@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <xc.h>
 #include <dsp.h>
+#include "Config.h"
+
 
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
@@ -42,15 +44,8 @@ int main()
   
     while(1)
     {
-        /*
-            __delay32(k);
-            LATBbits.LATB9 = 1;
-            LATBbits.LATB8 = 1;
-            __delay32(k);
-            LATBbits.LATB9 = 0;
-            LATBbits.LATB8 = 0;
-            if(k>10000) k=k-100;
-         */
+
+
     }
 
 
@@ -61,21 +56,25 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
 
-        motor_pulse=!motor_pulse;
+        if(motor_pulse == 0)
+            motor_pulse = 1;
+        else
+            motor_pulse = 0;
+       
         LATBbits.LATB9 = motor_pulse;
         LATBbits.LATB8 = motor_pulse;
         
-        // First Acceleration
-        if(PR1 > 3000){
+        // First Acceleration - If timer interval < 3000
+        if(PR1 > ATIMER_FIRST_BOUND){
             PR1 = PR1 - 4;             // Set the timer
         }
-        // Second Acceleration
-        else if(PR1 > 700){
+        // Second Acceleration - If timer interval < 700
+        else if(PR1 > ATIMER_SECOND_BOUND){
             PR1 = PR1 - 1;
         }
-        // Third Acceleration
-        else if(PR1 > 300){
-            if( timer_skip == 500 ){
+        // Third Acceleration - If timer interval < 300
+        else if(PR1 > ATIMER_THIRD_BOUND){
+            if( timer_skip == ATIMER_THIRD_SKIPR ){
                 PR1 = PR1-1;
                 timer_skip = 0;
             }
@@ -86,6 +85,7 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
          
 
 }
+
 
 void setupTimer1(void)
 {
