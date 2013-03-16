@@ -18,6 +18,8 @@ void configurePLL(void);
 void configureTimer(void);
 
 long i = 0;
+int ledState = 0;
+
 int main()
 {
     long i = 0;
@@ -32,32 +34,10 @@ int main()
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
 
-
     configurePLL();
     configureTimer();
 
-    while(1)
-    {
-        i=0;
-        while(i<80000) {
-            LATBbits.LATB4 = 1;
-            LATAbits.LATA4 = 1;
-            i++;
-        }
-
-
-        i = 0;
-        while(i<70000) {
-            LATBbits.LATB4 = 0;
-            LATAbits.LATA4 = 0;
-            i++;
-        }
-
-    }
     while(1);
-
-
-
 
 }
 
@@ -80,31 +60,28 @@ void configurePLL()
 
 void configureTimer()
 {
-    T1CON = 0;
-    T1CONbits.TCKPS = 1;
-    PR1 = 50000;
+    // Timer 1 configuration
+    T1CON = 0;                  // Reset T1 Configuration
+    T1CONbits.TCKPS = 3;        // Set ratio to the highest
+    PR1 = 50000;                // Set the timer to look for
 
-    _T1IP = 1;
+    _T1IP = 1;                  
     _T1IF = 0;
     _T1IE = 1;
-    T1CONbits.TON = 1;
+    T1CONbits.TON = 1;          // Enable Timer
 
 }
 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
-        i=0;
-        while(i<80000) {
-            LATBbits.LATB4 = 1;
-            LATAbits.LATA4 = 1;
-            i++;
-        }
+    _T1IF = 0;      // Reset the timer flag
 
-        i = 0;
-        while(i<70000) {
-            LATBbits.LATB4 = 0;
-            LATAbits.LATA4 = 0;
-            i++;
-        }
+    
+    if(ledState == 0)
+        ledState = 1;
+    else
+        ledState = 0;
 
+    LATBbits.LATB4=ledState;
+    LATAbits.LATA4=ledState;
 }
