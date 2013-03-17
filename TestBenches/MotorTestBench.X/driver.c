@@ -10,6 +10,7 @@
 #include <xc.h>
 #include <dsp.h>
 #include "config.h"
+#include "pinconfig.h"
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
@@ -28,9 +29,14 @@ int main()
     ANSELA = 0;//configures pin B4 as digital
     ANSELB = 0;//configures pin B4 as digital
 
+
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
     
+    TRISBbits.TRISB15 = 1;
+    TRISBbits.TRISB14 = 1;
+    TRISBbits.TRISB13 = 1;
+
     // Initial pin states
     LATBbits.LATB4=0;
     LATAbits.LATA4=0;
@@ -39,7 +45,21 @@ int main()
     configurePLL();
     configureTimer();
 
-    while(1);           // Don't need this since we're only using timers..
+    PIN_Emitter1 = 0;
+    while(1)           // Don't need this since we're only using timers..
+    {
+        if(PORTBbits.RB14 == 1)
+        {
+            PIN_Emitter1 = 1;
+        }
+        else
+        {
+            PIN_Emitter1 = 0;
+        }
+    }
+
+        
+
 }
 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
@@ -62,14 +82,11 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
      * RB7
      * RB6
      */
-    LATBbits.LATB4=ledState;
-    LATBbits.LATB5=ledState;
-    LATBbits.LATB6=ledState;
-    LATBbits.LATB7=ledState;
-    LATBbits.LATB8=ledState;
-    LATBbits.LATB9=ledState;
-    LATBbits.LATB10=ledState;
-    LATAbits.LATA4=ledState;
+     PIN_Motor1_Step = ledState;
+     PIN_Motor1_Direction = ledState;
+     PIN_Motor2_Step = ledState;
+     PIN_Motor2_Direction = ledState;
+
 }
 
 void configurePLL()
