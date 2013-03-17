@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <xc.h>
 #include <dsp.h>
-
+#include "config.h"
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
@@ -94,8 +94,8 @@ void configureTimer()
 {
     // Timer 1 configuration
     T1CON = 0;                  // Reset T1 Configuration
-    T1CONbits.TCKPS = 3;        // Set ratio to the highest
-    PR1 = 50000;                // Set the timer to look for
+    T1CONbits.TCKPS = TIMER_RATIO;        // Set ratio to the highest
+    PR1 = TIMER_DELAY;                // Set the timer to look for
 
     _T1IP = 1;                  
     _T1IF = 0;
