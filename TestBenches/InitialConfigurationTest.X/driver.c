@@ -46,7 +46,6 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
     _T1IF = 0;      // Reset the timer flag
 
-    
     if(ledState == 0)
         ledState = 1;
     else
@@ -86,7 +85,6 @@ void configurePLL()
 
     while (OSCCONbits.COSC!= 0b001);
     while (OSCCONbits.LOCK!= 1);
-
 }
 
 
