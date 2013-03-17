@@ -25,20 +25,52 @@ int main()
     long i = 0;
     //int number = 0;
 
-    LATBbits.LATB4=0;
-    LATAbits.LATA4=0;
-
     ANSELA = 0;//configures pin B4 as digital
     ANSELB = 0;//configures pin B4 as digital
 
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
+    
+    // Initial pin states
+    LATBbits.LATB4=0;
+    LATAbits.LATA4=0;
 
+    // Configure things
     configurePLL();
     configureTimer();
 
-    while(1);
+    while(1);           // Don't need this since we're only using timers..
+}
 
+void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
+{
+    _T1IF = 0;      // Reset the timer flag
+
+    
+    if(ledState == 0)
+        ledState = 1;
+    else
+        ledState = 0;
+
+    /* Pins that we need to test:
+     * RA2
+     * RA3
+     * RB4
+     * RB5
+     * RB10
+     * RB9
+     * RB8
+     * RB7
+     * RB6
+     */
+    LATBbits.LATB4=ledState;
+    LATBbits.LATB5=ledState;
+    LATBbits.LATB6=ledState;
+    LATBbits.LATB7=ledState;
+    LATBbits.LATB8=ledState;
+    LATBbits.LATB9=ledState;
+    LATBbits.LATB10=ledState;
+    LATAbits.LATA4=ledState;
 }
 
 void configurePLL()
@@ -69,19 +101,5 @@ void configureTimer()
     _T1IF = 0;
     _T1IE = 1;
     T1CONbits.TON = 1;          // Enable Timer
-
 }
 
-void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
-{
-    _T1IF = 0;      // Reset the timer flag
-
-    
-    if(ledState == 0)
-        ledState = 1;
-    else
-        ledState = 0;
-
-    LATBbits.LATB4=ledState;
-    LATAbits.LATA4=ledState;
-}
