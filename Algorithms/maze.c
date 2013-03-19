@@ -20,6 +20,9 @@ int main()
 {
     // declare the cells
     Cell maze[16][16];
+    Cell real_maze[16][16];
+    Cell mouse_maze[16][16];
+
     char rawMaze[33][65];
     
     readRawMaze(rawMaze);

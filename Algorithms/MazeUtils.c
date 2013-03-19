@@ -68,8 +68,6 @@ void grabMaze(Cell maze[maze_height][maze_width], char rawMaze[RAWH][RAWW])
             maze[i][j].floodValue = 0;
             // Initalize Flood Value
 
-            
-
         }
 
     }

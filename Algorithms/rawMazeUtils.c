@@ -6,7 +6,6 @@ int checkRawNorth(char rawmaze[rawH][rawW], int x, int y) {
     int rawX = mazeToRawX(x);
     int rawY = mazeToRawY(y);
 
-
     if( rawmaze[rawY-1][rawX] == '-')
         return TRUE;
     else
