@@ -9,34 +9,27 @@
  *
  */
 
-
-// Cell Structure
-struct Cell{
-     int floodValue;
-     int x;
-     int y;
-     bool north;
-     bool east;
-     bool south;
-     bool west;
-}
+#include <stdio.h>
+#include "rawMazeUtils.h"
+#include "MazeUtils.h"
+#include "tfdef.h"
 
 
 
 int main()
 {
     // declare the cells
-    Cell[16][16];
+    Cell maze[16][16];
+    char rawMaze[33][65];
     
-    // Read the maze
-        // Read the north/south walls
+    readRawMaze(rawMaze);
+    printRawMaze(rawMaze);
 
-        // Read the West/East walls
+    checkCell(rawMaze, 0, 0);
 
-   
-
+    initMaze(maze, rawMaze);
+    printMaze(maze);
 }
-
 
 
 
