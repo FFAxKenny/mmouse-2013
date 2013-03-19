@@ -18,5 +18,5 @@ typedef struct{
 }Cell;
 
 void printMaze(Cell maze[maze_height][maze_width]);
-void initMaze(Cell maze[maze_height][maze_width], char rawMaze[RAWH][RAWW]);
+void initMaze(Cell maze[maze_height][maze_width]);
 

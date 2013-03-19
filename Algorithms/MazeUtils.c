@@ -16,10 +16,8 @@ void printMaze(Cell maze[maze_height][maze_width]){
 
 }
 
-void initMaze(Cell maze[maze_height][maze_width], char rawMaze[RAWH][RAWW])
+void initMaze(Cell maze[maze_height][maze_width])
 {
-    int rowCounter = 0;
-    int columnCounter = 0;
     int x;
     int y;
     int i = 0;
