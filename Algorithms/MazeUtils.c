@@ -23,7 +23,6 @@ void initMaze(Cell maze[maze_height][maze_width])
     int i = 0;
     int j = 0;
 
-    
     for(i = 0; i < MAZE_HEIGHT ; i++)
     {
         for( j = 0; j < MAZE_WIDTH ; j++)
@@ -39,7 +38,6 @@ void initMaze(Cell maze[maze_height][maze_width])
         }
 
     }
-
 
 
 }
