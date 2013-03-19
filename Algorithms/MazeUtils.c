@@ -8,7 +8,7 @@ void printMaze(Cell maze[maze_height][maze_width]){
     {
         for(j = 0; j < MAZE_WIDTH ; j++)
         {
-            printf("%d   ", maze[i][j].floodValue);
+            printf("%02d  ", maze[i][j].floodValue);
 
         }
         printf("\n\n");
@@ -35,6 +35,31 @@ void initMaze(Cell maze[maze_height][maze_width])
             maze[i][j].y = i;
             maze[i][j].floodValue = 0;
             // Initalize Flood Value
+        }
+
+    }
+
+
+}
+
+void initMazeFromRaw(Cell maze[maze_height][maze_width], char rawMaze[RAWH][RAWW])
+{
+    int x;
+    int y;
+    int i = 0;
+    int j = 0;
+
+    for(i = 0; i < MAZE_HEIGHT ; i++)
+    {
+        for( j = 0; j < MAZE_WIDTH ; j++)
+        {
+            maze[i][j].north = checkRawNorth(rawMaze,i,j);
+            maze[i][j].south = checkRawSouth(rawMaze,i,j);
+            maze[i][j].west = checkRawWest(rawMaze,i,j);
+            maze[i][j].east = checkRawEast(rawMaze,i,j);
+            maze[i][j].x = j;                             // Initalize the X and Y
+            maze[i][j].y = i;
+            maze[i][j].floodValue = 0;
         }
 
     }

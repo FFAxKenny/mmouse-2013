@@ -14,8 +14,6 @@
 #include "MazeUtils.h"
 #include "tfdef.h"
 
-
-
 int main()
 {
     // declare the cells
@@ -25,19 +23,15 @@ int main()
 
     char rawMaze[33][65];
     
-    readRawMaze(rawMaze);
-    printRawMaze(rawMaze);
+    readRawMaze(rawMaze);       // Reads the raw maze into char array
+    printRawMaze(rawMaze);      // Prints it out so we cna double check..
 
-    checkCell(rawMaze, 0, 0);
+    initMaze(mouse_maze);
+    initMazeFromRaw(real_maze, rawMaze);
+    printMaze(mouse_maze);      // Prints the maze's values
 
-    initMaze(maze, rawMaze);
-    printMaze(maze);
+    checkCell(rawMaze, 0, 0);   
+
+    // Run Main maze program
+
 }
-
-
-
-
-
-
-
-
