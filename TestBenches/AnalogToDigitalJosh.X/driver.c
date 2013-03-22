@@ -57,6 +57,7 @@ int main()
     while(1)                        // Check ADC 
     {
         reading = sampleADC();
+        while(1);
         if(reading >= 1)
         {
             PIN_Emitter1 = 1;
@@ -102,12 +103,11 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 
 int sampleADC(void)
 {
-    int ADCValue;
-    AD1CON1bits.SAMP = 1;
-    Delayms(100);
-    AD1CON1bits.SAMP = 0;
-    while (!AD1CON1bits.DONE);
-    ADCValue = ADC1BUF0;
+    AD1CON1bits.SAMP = 1;           // Start Conversion
+    ADC1BUF0 = 0x0000;              // Clear ADC1 Buffer
+    while (!AD1CON1bits.DONE);      // Conversion done? Waiting for 1
+    AD1CON1bits.DONE = 0;           // Clear conversion done status bit
+    ADCValue = int (1/ADC1BUF0);
     return ADCValue;
 }
 
@@ -143,6 +143,21 @@ void configureTimer()
 
 void initAdc1()
 {
+    AD1CON1 = 0x04E0;                   // A/D Control Register 1
+    AD1CON2 = 0x0000;                   // A/D Control Register 2
+    AD1CON3bits.SAMC = 0b11000;         // A/D Control Register 3
+    AD1CON3bits.ADCS = 8;
+    AD1CON4 = 0x0000;                   // A/D Control Register 4
+
+    AD1CSSLbits.CSS0 = 1;               // Select AN0 Sensor L2
+    AD1CSSLbits.CSS1 = 0;
+    AD1CSSLbits.CSS4 = 0;
+    AD1CSSLbits.CSS5 = 0;
+
+    AD1CON1bits.ADON = 1;               // Begin Sampling Sequence
+
+    /* Old Configuration */
+    /*
     // Set analog port to analog
     ANSELAbits.ANSA0 = 1;           // Select AN0 is analog
 
@@ -156,6 +171,7 @@ void initAdc1()
     AD1CSSH = 0x0000;
     AD1CSSL = 0x0000;
     AD1CON1bits.ADON = 1;
+    */
     Delayms(30);
 
 

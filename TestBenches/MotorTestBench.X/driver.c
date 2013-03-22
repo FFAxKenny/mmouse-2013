@@ -21,6 +21,7 @@ void configureTimer(void);
 
 long i = 0;
 int ledState = 0;
+int motorDir = 1;
 
 int main()
 {
@@ -83,10 +84,10 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
      * RB7
      * RB6
      */
-     PIN_Motor1_Step = ledState;
-     PIN_Motor1_Direction = ledState;
+     PIN_Motor1_Step = ledState;                // RB9 
+     PIN_Motor1_Direction = motorDir;
      PIN_Motor2_Step = ledState;
-     PIN_Motor2_Direction = ledState;
+     PIN_Motor2_Direction = motorDir;
 
 }
 
@@ -102,16 +103,14 @@ void configurePLL()
     __builtin_write_OSCCONL(OSCCON | 0x01);
 
     while (OSCCONbits.COSC!= 0b001);
-    while (OSCCONbits.LOCK!= 1);
+    //while (OSCCONbits.LOCK!= 1);
 }
 
 
 void configureTimer()
-{
-    // Timer 1 configuration
-    T1CON = 0;                  // Reset T1 Configuration
-    T1CONbits.TCKPS = TIMER_RATIO;        // Set ratio to the highest
-    PR1 = TIMER_DELAY;                // Set the timer to look for
+{ // Timer 1 configuration T1CON = 0;                  // Reset T1 Configuration
+    T1CONbits.TCKPS = 3;        // Set ratio to the highest
+    PR1 = 20000;                // Set the timer to look for
 
     _T1IP = 1;                  
     _T1IF = 0;
