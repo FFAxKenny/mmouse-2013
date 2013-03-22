@@ -14,8 +14,8 @@
 #include <p33Exxxx.h>
 
 //#pragma config OSCIOFNC = ON            // OSC2 Pin Function bit (OSC2 is general purpose digital I/O pin)
-_FOSCSEL(FNOSC_FRC & IESO_OFF);
-_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);
+_FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Set Clock
+_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);    // Set Some other things..
 
 void configurePLL(void);
 void configureTimer(void);
@@ -25,37 +25,38 @@ int sampleADC(void);
 
 int ledState = 0;
 int reading = 0;
+
 int main()
 {
     
     //int number = 0;
 
-    ANSELA = 0;//configures pin B4 as digital
-    ANSELB = 0;//configures pin B4 as digital
+    ANSELA = 0;                     // configures pin B4 as digital
+    ANSELB = 0;                     // configures pin B4 as digital
     ANSELAbits.ANSA0 = 1;           // Select AN0 is analog
 
-    TRISA = 0b00000000;      // Configure B Ports as output
-    TRISB = 0b00000000;      // Configure B Ports as output
+    TRISA = 0b00000000;             // Configure B Ports as output
+    TRISB = 0b00000000;             // Configure B Ports as output
     
-    TRISBbits.TRISB15 = 1;   // Inputs
+    TRISBbits.TRISB15 = 1;          // Inputs
     TRISBbits.TRISB14 = 1;
     TRISBbits.TRISB13 = 1;
 
-    TRISAbits.TRISA0 = 1;    // Configure A0 is an input
+    TRISAbits.TRISA0 = 1;           // Configure A0 is an input
     
 
     // Configure things
-    configurePLL();
-    configureTimer();
+    configurePLL();                 // Configure the clock and PLL
+    configureTimer();               // Configure the timer
 
-    initAdc1();
+    initAdc1();                     // Init the ADC Config
 
     PIN_Emitter1 = 0;
     PIN_Emitter2 = 0;
-    while(1)           // Don't need this since we're only using timers..
+
+    while(1)                        // Check ADC 
     {
         reading = sampleADC();
-        while(1);
         if(reading >= 1)
         {
             PIN_Emitter1 = 1;
@@ -113,9 +114,9 @@ int sampleADC(void)
 void configurePLL()
 {
     // Configure PLL prescaler, PLL postscaler, PLL divisor
-    PLLFBD=63;              // M=65
-    CLKDIVbits.PLLPOST=0;   // N2=2
-    CLKDIVbits.PLLPRE=1;    // N1=3
+    PLLFBD=63;                  // M=65
+    CLKDIVbits.PLLPOST=0;       // N2=2
+    CLKDIVbits.PLLPRE=1;        // N1=3
 
     // Initiate Clock Switch to FRC oscillator with PLL (NOSC=0b001)
     __builtin_write_OSCCONH(0x01);
@@ -129,14 +130,14 @@ void configurePLL()
 void configureTimer()
 {
     // Timer 1 configuration
-    T1CON = 0;                  // Reset T1 Configuration
-    T1CONbits.TCKPS = TIMER_RATIO;        // Set ratio to the highest
-    PR1 = TIMER_DELAY;                // Set the timer to look for
+    T1CON = 0;                      // Reset T1 Configuration
+    T1CONbits.TCKPS = TIMER_RATIO;  // Set ratio to the highest
+    PR1 = TIMER_DELAY;              // Set the timer to look for
 
     _T1IP = 1;                  
     _T1IF = 0;
     _T1IE = 1;
-    T1CONbits.TON = 1;          // Enable Timer
+    T1CONbits.TON = 1;              // Enable Timer
 }
 
 
@@ -146,11 +147,11 @@ void initAdc1()
     ANSELAbits.ANSA0 = 1;           // Select AN0 is analog
 
     // Initialize and enable ADC
-    AD1CON1 = 0x0000;
+    AD1CON1 = 0x0000;       
     AD1CON2 = 0x0000;
-    AD1CON3 = 0x001F;   //..1111
+    AD1CON3 = 0x001F;               //..1111
     AD1CON4 = 0x0000;
-    AD1CHS0 = 0x0005;   //..0101
+    AD1CHS0 = 0x0005;               //..0101
     AD1CHS123 = 0x0000;
     AD1CSSH = 0x0000;
     AD1CSSL = 0x0000;

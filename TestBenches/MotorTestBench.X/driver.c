@@ -13,7 +13,8 @@
 #include "pinconfig.h"
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
-_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
+_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);
+
 
 void configurePLL(void);
 void configureTimer(void);
