@@ -1,5 +1,9 @@
 mmouse-2013
 ===========
 
-Micromouse Spring 2013
-Yay micromouse
+This is the main repository for Team Manapua's Micromouse Code
+
+An explaination of the folders:
+
+Algorithms/     - The Main algorithms testing folder
+TestBenches/    - Hardware Test Benches
