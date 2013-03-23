@@ -7,12 +7,12 @@
 CCC = g++
 CCFLAGS = -ansi
 
-maze: maze.o rawMazeUtils.o MazeUtils.o
-	$(CCC) -o maze maze.o rawMazeUtils.o MazeUtils.o
+mazetest: driver.o RawMaze.o Maze.o
+	$(CCC) -o mazetest driver.o RawMaze.o Maze.o
 
-maze.o: rawMazeUtils.h MazeUtils.h
-rawMazeUtils.o: rawMazeUtils.h
-MazeUtils.o: rawMazeUtils.h MazeUtils.h
+mazetest.o: RawMaze.h Maze.h
+RawMaze.o: RawMaze.h
+Maze.o: RawMaze.h Maze.h
 
 clean:
 	rm -f *.o

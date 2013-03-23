@@ -1,19 +1,19 @@
 #include <stdio.h>
-#include "rawMazeUtils.h"
+#include "RawMaze.h"
 #include "tfdef.h"
 
-int checkRawNorth(char rawmaze[rawH][rawW], int x, int y) {
-    int rawX = mazeToRawX(x);
-    int rawY = mazeToRawY(y);
+int RawMaze_checkNorth(char rawmaze[rawH][rawW], int x, int y) {
+    int rawX = RawMaze_mazeToRawX(x);
+    int rawY = RawMaze_mazeToRawY(y);
 
     if( rawmaze[rawY-1][rawX] == '-')
         return TRUE;
     else
         return FALSE;
 }
-int checkRawSouth(char rawmaze[rawH][rawW], int x, int y) {
-    int rawX = mazeToRawX(x);
-    int rawY = mazeToRawY(y);
+int RawMaze_checkSouth(char rawmaze[rawH][rawW], int x, int y) {
+    int rawX = RawMaze_mazeToRawX(x);
+    int rawY = RawMaze_mazeToRawY(y);
 
 
     if( rawmaze[rawY+1][rawX] == '-')
@@ -22,9 +22,9 @@ int checkRawSouth(char rawmaze[rawH][rawW], int x, int y) {
         return FALSE;
 }
 
-int checkRawWest(char rawmaze[rawH][rawW], int x, int y) {
-    int rawX = mazeToRawX(x);
-    int rawY = mazeToRawY(y);
+int RawMaze_checkWest(char rawmaze[rawH][rawW], int x, int y) {
+    int rawX = RawMaze_mazeToRawX(x);
+    int rawY = RawMaze_mazeToRawY(y);
 
 
     if( rawmaze[rawY][rawX-2] == '|')
@@ -33,9 +33,9 @@ int checkRawWest(char rawmaze[rawH][rawW], int x, int y) {
         return FALSE;
 }
 
-int checkRawEast(char rawmaze[rawH][rawW], int x, int y) {
-    int rawX = mazeToRawX(x);
-    int rawY = mazeToRawY(y);
+int RawMaze_checkEast(char rawmaze[rawH][rawW], int x, int y) {
+    int rawX = RawMaze_mazeToRawX(x);
+    int rawY = RawMaze_mazeToRawY(y);
     if( rawmaze[rawY][rawX+2] == '|')
         return TRUE;
     else
@@ -43,7 +43,7 @@ int checkRawEast(char rawmaze[rawH][rawW], int x, int y) {
 }
 
 
-void readRawMaze(char rawMaze[rawMaze_height][rawMaze_width])
+void RawMaze_read(char rawMaze[rawMaze_height][rawMaze_width])
 {
     int x=0;
     int y=0;
@@ -66,7 +66,7 @@ void readRawMaze(char rawMaze[rawMaze_height][rawMaze_width])
     }
 
 }
-void printRawMaze(char rawMaze[rawMaze_height][rawMaze_width])
+void RawMaze_print(char rawMaze[rawMaze_height][rawMaze_width])
 {
     int i,j;
     for( i = 0; i < 33; i++)
@@ -80,44 +80,44 @@ void printRawMaze(char rawMaze[rawMaze_height][rawMaze_width])
 
 }
 
-int rawToMazeX(int rawX)        // Converts RAW x coordnates to Maze X coordinates
+int RawMaze_rawToMazeX(int rawX)        // Converts RAW x coordnates to Maze X coordinates
 {
     return (rawX/2 - 1);
 
 }
-int rawToMazeY(int rawY)       // Concerts RAW Y coordinates to Maze Y coordinates
+int RawMaze_rawToMazeY(int rawY)       // Concerts RAW Y coordinates to Maze Y coordinates
 {
     return ((rawY -1)/2);
 }
 
-int mazeToRawX(int mazeX){
+int RawMaze_mazeToRawX(int mazeX){
     int temp;
     temp = (mazeX*4) + 2;
     return temp;
 }
 
-int mazeToRawY(int mazeY)
+int RawMaze_mazeToRawY(int mazeY)
 {
     int temp;
     temp = ( mazeY*2 + 1);
     return temp;
 }
 
-void checkCell(char rawmaze[rawH][rawW], int x, int y)
+void RawMaze_checkCell(char rawmaze[rawH][rawW], int x, int y)
 {
     printf("North: ");
-    if(checkRawNorth(rawmaze, x,y)) printf("X\n");
+    if( RawMaze_checkNorth(rawmaze, x,y) ) printf("X\n"); 
     else printf("\n");
 
     printf("East: ");
-    if(checkRawEast(rawmaze, x,y)) printf("X\n");
+    if ( RawMaze_checkEast(rawmaze, x,y) ) printf("X\n");
     else printf("\n");
 
     printf("West: ");
-    if(checkRawWest(rawmaze, x,y)) printf("X\n");
+    if ( RawMaze_checkWest(rawmaze, x,y) )printf("X\n");
     else printf("\n");
     
     printf("South: ");
-    if(checkRawSouth(rawmaze, x,y)) printf("X\n");
+    if (RawMaze_checkSouth(rawmaze, x,y) )printf("X\n");
     else printf("\n");
 }
