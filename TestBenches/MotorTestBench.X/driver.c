@@ -43,11 +43,9 @@ int main()
     LATBbits.LATB6=1;
     LATBbits.LATB5=1;
     LATAbits.LATA4=1;
-
     
     ANSELA = 0;//configures pin B4 as digital
     ANSELB = 0;//configures pin B4 as digital
- 
 
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
@@ -65,10 +63,19 @@ int main()
     initPLL();
     initAD();
 
-    while(PORTBbits.RB15 == 0);
-    for(k = 0; k< 30000; k++);
+    while(ADCValue < 50)            // Wait for input
+    {
+        delayMicro(100);
+        AD1CON1bits.SAMP = 0;
+        while (!AD1CON1bits.DONE);
+        AD1CON1bits.DONE = 0;
+        ADCValue = ADC1BUF0;
+    }
+     
+    for(k = 0; k< 100000; k++);
     /********************************
-     *      Main Body ********************************/ LATBbits.LATB14 = 0;
+     *      Main Body ********************************/ 
+    LATBbits.LATB14 = 0;     // Enable Motors
     T1CONbits.TON = 1;       // Enable Timer
 
     while(1)
@@ -88,6 +95,10 @@ int main()
             step2 = 0;
             step1  = 1; 
         }
+
+        // Software Reset
+        if(PORTBbits.RB15 == 1)
+            asm("goto 0");
 
     }
 
@@ -126,8 +137,8 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         LATBbits.LATB9 = motor_pulse1;
         LATBbits.LATB8 = motor_pulse2;
         
-        if(PR1 > 6000)
-            PR1 = PR1 - 25;            // Set the timer
+        //if(PR1 > 6000)
+            //PR1 = PR1 - 25;            // Set the timer
 
         /*
         else if(PR1 > 2200)
@@ -210,7 +221,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 17000;             // Set the timer
+    PR1 = 10000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
