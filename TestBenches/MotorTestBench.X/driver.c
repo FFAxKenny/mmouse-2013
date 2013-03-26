@@ -18,11 +18,16 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 //_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 
 long i = 0;
-int motor_pulse = 0;
+int motor_pulse1 = 0;
+int motor_pulse2 = 0;
+int step1 = 1;
+int step2 = 1;
 int test;
 float value;
 int corr;
 int ADCValue;
+int correct_offset = 0;
+int error_offset = 0;
 
 void delayMicro(unsigned int delay);
 void initAD(void);
@@ -47,9 +52,11 @@ int main()
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
     TRISBbits.TRISB15 = 1;
+    TRISBbits.TRISB3 = 1;
     TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
     
     LATBbits.LATB5 = 1;
+    LATBbits.LATB7 = 1;
     LATBbits.LATB6 = 1;
     LATBbits.LATB14 = 1;
     
@@ -61,39 +68,27 @@ int main()
     while(PORTBbits.RB15 == 0);
     for(k = 0; k< 30000; k++);
     /********************************
-     *      Main Body
-     ********************************/
-    LATBbits.LATB14 = 0;
+     *      Main Body ********************************/ LATBbits.LATB14 = 0;
     T1CONbits.TON = 1;       // Enable Timer
 
     while(1)
     {
 
-        /*
         delayMicro(100);
         AD1CON1bits.SAMP = 0;
         while (!AD1CON1bits.DONE);
         AD1CON1bits.DONE = 0;
         ADCValue = ADC1BUF0;
 
-        LATBbits.LATB13 = 1;
-        if(ADCValue > 100) 
-        {
-            LATBbits.LATB14 = 1;
+        if(ADCValue > 60){
+            step2  = 1;
+            step1  = 0; 
         }
-        else
-        {
-            LATBbits.LATB14 = 0;
+        else{
+            step2 = 0;
+            step1  = 1; 
         }
 
-            __delay32(k);
-            LATBbits.LATB9 = 1;
-            LATBbits.LATB8 = 1;
-            __delay32(k);
-            LATBbits.LATB9 = 0;
-            LATBbits.LATB8 = 0;
-            if(k>10000) k=k-100;
-         */
     }
 
 
@@ -102,30 +97,46 @@ int main()
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
-
-        if(motor_pulse==0)
-            motor_pulse=1;
-        else
-            motor_pulse=0;
-
-        LATBbits.LATB9 = motor_pulse;
-        LATBbits.LATB8 = motor_pulse;
-
         
-        if(PR1 > 4000)
+        if(step1 == 1 || correct_offset < 25)
+        {
+            if(motor_pulse1==0)
+                motor_pulse1=1;
+            else
+                motor_pulse1=0;
+        }
+
+        if(step2 == 1 || correct_offset < 25)
+        {
+            if(motor_pulse2==0)
+                motor_pulse2=1;
+            else
+                motor_pulse2=0;
+        }
+        if(correct_offset < 25)
+        {
+            correct_offset++;
+        }
+        else
+        {
+            correct_offset = 0;
+
+        }
+
+        LATBbits.LATB9 = motor_pulse1;
+        LATBbits.LATB8 = motor_pulse2;
+        
+        if(PR1 > 6000)
             PR1 = PR1 - 25;            // Set the timer
 
         /*
         else if(PR1 > 2200)
         {
             PR1 = PR1 - 5;
-        } else
+        } 
+        else if(PR1 > 1800)
         {
-        
-        }
-        else if(PR1 > 2000)
-        {
-            if( test == 1 )
+            if( test == 45 )
             {
                 PR1 = PR1-1;
                 test = 0;
@@ -135,7 +146,7 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
                 test++;
             }
         }
-         */
+        */
         
 
         // The body of the Timer1 Interrupt goes here
@@ -149,13 +160,16 @@ void initAD(void)
      *      Analog to Digital Configuration
      **************************************/
     ANSELAbits.ANSA0 = 1;         // Set pin A0 as analog 
-    ANSELAbits.ANSA1 = 1;         // Set pin A0 as analog 
+    ANSELBbits.ANSB0 = 1;         // Set pin A0 as analog 
+    ANSELBbits.ANSB1 = 1;         // Set pin A0 as analog 
+    ANSELBbits.ANSB2 = 1;         // Set pin A0 as analog 
+    ANSELBbits.ANSB3 = 1;         // Set pin A0 as analog 
 
     AD1CON1 = 0x0004;
     AD1CON2 = 0x0000;
     AD1CON3 = 0x000F;
     AD1CON4 = 0x0000;
-    AD1CHS0 = 0x0001;
+    AD1CHS0 = 0x0005;
     AD1CHS123 = 0x0000;
     AD1CSSH = 0x0000;
     AD1CSSL = 0x0000;
