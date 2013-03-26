@@ -25,6 +25,9 @@ int corr;
 int ADCValue;
 
 void delayMicro(unsigned int delay);
+void initAD(void);
+void initPLL(void);
+void initTimer1(void);
 
 int main()
 {
@@ -48,66 +51,25 @@ int main()
     
     LATBbits.LATB5 = 1;
     LATBbits.LATB6 = 1;
-    LATBbits.LATB14 = 0;
+    LATBbits.LATB14 = 1;
     
- 
-    /********************************
-     *      Timer1 Configuration
-     ********************************/
-    T1CON = 0;               // Reset T1 Configuration
-    T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 17000;             // Set the timer
 
-    _T1IP = 1;
-    _T1IF = 0;
-    _T1IE = 1;
-    T1CONbits.TON = 0;       // Enable Timer
+    initTimer1();
+    initPLL();
+    initAD();
 
-    /********************************
-     *      PLL Configuration
-     ********************************/
-    // Configure PLL prescaler, PLL postscaler, PLL divisor
-    PLLFBD=63;              // M=65
-    CLKDIVbits.PLLPOST=0;   // N2=2
-    CLKDIVbits.PLLPRE=1;    // N1=3
-
-    // Initiate Clock Switch to FRC oscillator with PLL (NOSC=0b001)
-    __builtin_write_OSCCONH(0x01);
-    __builtin_write_OSCCONL(OSCCON | 0x01);
-
-    // Wait for Clock switch to occur
-    while (OSCCONbits.COSC!= 0b001);
-    // Wait for PLL to lock
-    while (OSCCONbits.LOCK!= 1);
-
-    /**************************************
-     *      Analog to Digital Configuration
-     **************************************/
-    ANSELAbits.ANSA0 = 1;         // Set pin A0 as analog 
-    ANSELAbits.ANSA1 = 1;         // Set pin A0 as analog 
-
-    AD1CON1 = 0x0004;
-    AD1CON2 = 0x0000;
-    AD1CON3 = 0x000F;
-    AD1CON4 = 0x0000;
-    AD1CHS0 = 0x0001;
-    AD1CHS123 = 0x0000;
-    AD1CSSH = 0x0000;
-    AD1CSSL = 0x0000;
-    AD1CON1bits.ADON = 1;
-
-    delayMicro(20);
-
+    while(PORTBbits.RB15 == 0);
+    for(k = 0; k< 30000; k++);
     /********************************
      *      Main Body
      ********************************/
-    //while(PORTBbits.RB15 == 0);
-    //for(k = 0; k< 300000; k++);
+    LATBbits.LATB14 = 0;
     T1CONbits.TON = 1;       // Enable Timer
 
     while(1)
     {
 
+        /*
         delayMicro(100);
         AD1CON1bits.SAMP = 0;
         while (!AD1CON1bits.DONE);
@@ -124,7 +86,6 @@ int main()
             LATBbits.LATB14 = 0;
         }
 
-        /*
             __delay32(k);
             LATBbits.LATB9 = 1;
             LATBbits.LATB8 = 1;
@@ -154,11 +115,10 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         if(PR1 > 4000)
             PR1 = PR1 - 25;            // Set the timer
 
-        
         /*
-        else if(PR1 > 2750)
+        else if(PR1 > 2200)
         {
-            PR1 = PR1 - 1;
+            PR1 = PR1 - 5;
         } else
         {
         
@@ -177,13 +137,73 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         }
          */
         
-         
-         
 
         // The body of the Timer1 Interrupt goes here
 
 }
 
+
+void initAD(void)
+{
+    /**************************************
+     *      Analog to Digital Configuration
+     **************************************/
+    ANSELAbits.ANSA0 = 1;         // Set pin A0 as analog 
+    ANSELAbits.ANSA1 = 1;         // Set pin A0 as analog 
+
+    AD1CON1 = 0x0004;
+    AD1CON2 = 0x0000;
+    AD1CON3 = 0x000F;
+    AD1CON4 = 0x0000;
+    AD1CHS0 = 0x0001;
+    AD1CHS123 = 0x0000;
+    AD1CSSH = 0x0000;
+    AD1CSSL = 0x0000;
+    AD1CON1bits.ADON = 1;
+
+    delayMicro(20);
+
+}
+
+
+void initPLL(void)
+{
+    /********************************
+     *      PLL Configuration
+     ********************************/
+    // Configure PLL prescaler, PLL postscaler, PLL divisor
+    PLLFBD=63;              // M=65
+    CLKDIVbits.PLLPOST=0;   // N2=2
+    CLKDIVbits.PLLPRE=1;    // N1=3
+
+    // Initiate Clock Switch to FRC oscillator with PLL (NOSC=0b001)
+    __builtin_write_OSCCONH(0x01);
+    __builtin_write_OSCCONL(OSCCON | 0x01);
+
+    // Wait for Clock switch to occur
+    while (OSCCONbits.COSC!= 0b001);
+    // Wait for PLL to lock
+    while (OSCCONbits.LOCK!= 1);
+
+
+}
+
+
+void initTimer1(void)
+{
+    /********************************
+     *      Timer1 Configuration
+     ********************************/
+    T1CON = 0;               // Reset T1 Configuration
+    T1CONbits.TCKPS = 1;     // Set the ratio to the highest
+    PR1 = 17000;             // Set the timer
+
+    _T1IP = 1;
+    _T1IF = 0;
+    _T1IE = 1;
+    T1CONbits.TON = 0;       // Enable Timer
+
+}
 
 
 void delayMicro(unsigned int delay)
