@@ -74,7 +74,7 @@ int main()
         ADCValue = ADC1BUF0;
     }
      
-    for(k = 0; k< 100000; k++);
+    for(k = 0; k< 150000; k++);
     /********************************
      *      Main Body ********************************/ 
     LATBbits.LATB14 = 0;     // Enable Motors
@@ -124,6 +124,7 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
             else
                 motor_pulse2=0;
         }
+
         if(correct_offset < 25)
         {
             correct_offset++;
