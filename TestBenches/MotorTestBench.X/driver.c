@@ -37,8 +37,10 @@ void initTimer1(void);
 int main()
 {
     double k = 40000;
-    //int number = 0;
 
+    /**************************
+    **      PIN SETUP
+    **************************/
     LATBbits.LATB9=1;
     LATBbits.LATB6=1;
     LATBbits.LATB5=1;
@@ -58,7 +60,7 @@ int main()
     LATBbits.LATB6 = 1;
     LATBbits.LATB14 = 1;
     
-
+    // Init stuff
     initTimer1();
     initPLL();
     initAD();
@@ -80,7 +82,6 @@ int main()
 
     while(1)
     {
-
         delayMicro(100);
         AD1CON1bits.SAMP = 0;
         while (!AD1CON1bits.DONE);
@@ -98,8 +99,7 @@ int main()
 
         // Software Reset
         if(PORTBbits.RB15 == 1)
-            asm("goto 0");
-
+            __asm__ volatile ("reset");
     }
 
 
@@ -137,30 +137,6 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         LATBbits.LATB9 = motor_pulse1;
         LATBbits.LATB8 = motor_pulse2;
         
-        //if(PR1 > 6000)
-            //PR1 = PR1 - 25;            // Set the timer
-
-        /*
-        else if(PR1 > 2200)
-        {
-            PR1 = PR1 - 5;
-        } 
-        else if(PR1 > 1800)
-        {
-            if( test == 45 )
-            {
-                PR1 = PR1-1;
-                test = 0;
-            }
-            else
-            {
-                test++;
-            }
-        }
-        */
-        
-
-        // The body of the Timer1 Interrupt goes here
 
 }
 
@@ -221,7 +197,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 10000;             // Set the timer
+    PR1 = 7000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
@@ -241,3 +217,38 @@ void delayMicro(unsigned int delay)
     }
 
 }
+
+
+void acceleration(void)
+{
+
+
+
+    // Goes in the timer code 
+        //if(PR1 > 6000)
+            //PR1 = PR1 - 25;            // Set the timer
+
+        /*
+        else if(PR1 > 2200)
+        {
+            PR1 = PR1 - 5;
+        } 
+        else if(PR1 > 1800)
+        {
+            if( test == 45 )
+            {
+                PR1 = PR1-1;
+                test = 0;
+            }
+            else
+            {
+                test++;
+            }
+        }
+        */
+        
+
+        // The body of the Timer1 Interrupt goes here
+
+}
+
