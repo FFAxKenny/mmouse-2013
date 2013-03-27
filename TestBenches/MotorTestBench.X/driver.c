@@ -22,6 +22,8 @@
 #define F1_SENSOR   4
 #define F2_SENSOR   5
 
+#define CELL_DISTANCE 200
+
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 
@@ -68,12 +70,12 @@ int main()
         ADCValue = sampleSensor(L45_SENSOR);
 
         if(ADCValue > 60){
-            lMotor.enable  = TRUE;
-            rMotor.enable  = FALSE; 
+            lMotor.enable = TRUE;
+            rMotor.enable = FALSE; 
         }
         else{
             lMotor.enable = FALSE;
-            rMotor.enable  = TRUE; 
+            rMotor.enable = TRUE; 
         }
 
         // Software Reset
@@ -84,23 +86,31 @@ int main()
 
 
 }
+void Motor_step(Motor *m)
+{
+    if(m->step == 1)
+        m->step = 0;
+    else
+        m->step = 1;
+}
+    
+
+int calcError(int value1, int value2)
+{
+
+    return value1 - value2;
+
+}
+
 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
         
-        if( lMotor.enable || correct_offset < 25){
-            if(lMotor.step == 0)
-                lMotor.step = 1;
-            else
-                lMotor.step = 0;
-        }
+        if( lMotor.enable || correct_offset < 25)
+            Motor_step(&lMotor);
 
-        if( rMotor.enable || correct_offset < 25){
-            if(rMotor.step == 0)
-                rMotor.step = 1;
-            else
-                rMotor.step = 0;
-        }
+        if( rMotor.enable || correct_offset < 25)
+            Motor_step(&rMotor);
 
         if(correct_offset < 25)
             correct_offset++;
