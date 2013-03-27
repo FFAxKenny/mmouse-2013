@@ -9,9 +9,9 @@
 #define __PIN_MotorLDir         LATBbits.LATB6
 
 // Emitters
-#define __PIN_EmitR45            LATAbits.LATA2
+#define __PIN_EmitR45            LATBbits.LATB7
 #define __PIN_EmitR90            LATAbits.LATA3
-#define __PIN_EmitL45            LATBbits.LATB4
+#define __PIN_EmitL45            LATAbits.LATA4
 #define __PIN_EmitL90            LATAbits.LATA4
 #define __PIN_EmitF1            LATBbits.LATB7
 #define __PIN_EmitF2            LATBbits.LATB10

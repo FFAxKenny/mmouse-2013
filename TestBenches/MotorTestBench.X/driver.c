@@ -116,16 +116,19 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
 
 int sampleSensor(int sensor)
 {
+    AD1CON1bits.ADON = 0;
     switch(sensor)
     {
         case R45_SENSOR:
             AD1CHS0 = 0x0005;               
+            __PIN_EmitR45 = 1;
             break;
         case R90_SENSOR:
             AD1CHS0 = 0x0005;               
             break;
         case L45_SENSOR:
-            AD1CHS0 = 0x0005;               
+            AD1CHS0 = 0x0004;               
+            __PIN_EmitL45 = 1;
             break;
         case L90_SENSOR:
             AD1CHS0 = 0x0005;               
@@ -137,11 +140,16 @@ int sampleSensor(int sensor)
             AD1CHS0 = 0x0005;               
             break;
     }
-
+    
+    // Actually sample
+    AD1CON1bits.ADON = 1;
     delayMicro(100);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
+
+    __PIN_EmitR45 = 0;
+    __PIN_EmitL45 = 0;
     return ADC1BUF0;
 
 }
@@ -154,7 +162,6 @@ void initMotors(void)
     rMotor.step = 1;
     rMotor.enable = TRUE;
 }
-
 void initPins(void)
 {
     LATBbits.LATB9=1;
@@ -172,7 +179,6 @@ void initPins(void)
     TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
     
     LATBbits.LATB5 = 1;
-    LATBbits.LATB7 = 1;
     LATBbits.LATB6 = 1;
     LATBbits.LATB14 = 1;
 }
@@ -196,7 +202,7 @@ void initAD(void)
     AD1CHS123 = 0x0000;
     AD1CSSH = 0x0000;
     AD1CSSL = 0x0000;
-    AD1CON1bits.ADON = 1;
+    //AD1CON1bits.ADON = 1;
 
     delayMicro(20);
 
