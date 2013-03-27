@@ -41,6 +41,7 @@ void delayMicro(unsigned int delay);
 void initAD(void);
 void initPLL(void);
 void initTimer1(void);
+void initPins(void);
 
 int sampleSensor(int sensor);
 
@@ -48,7 +49,6 @@ typedef struct motor{
     int step;
     int enable;
 } Motor;
-
 
 Motor lMotor;
 Motor rMotor;
@@ -62,29 +62,9 @@ int main()
     rMotor.step = 1;
     rMotor.enable = TRUE;
 
-    /**************************
-    **      PIN SETUP
-    **************************/
-    LATBbits.LATB9=1;
-    LATBbits.LATB6=1;
-    LATBbits.LATB5=1;
-    LATAbits.LATA4=1;
-    
-    ANSELA = 0;//configures pin B4 as digital
-    ANSELB = 0;//configures pin B4 as digital
-
-    TRISA = 0b00000000;      // Configure B Ports as output
-    TRISB = 0b00000000;      // Configure B Ports as output
-    TRISBbits.TRISB15 = 1;
-    TRISBbits.TRISB3 = 1;
-    TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
-    
-    LATBbits.LATB5 = 1;
-    LATBbits.LATB7 = 1;
-    LATBbits.LATB6 = 1;
-    LATBbits.LATB14 = 1;
     
     // Init stuff
+    initPins();
     initTimer1();
     initPLL();
     initAD();
@@ -169,6 +149,28 @@ int sampleSensor(int sensor)
 
 }
 
+
+void initPins(void)
+{
+    LATBbits.LATB9=1;
+    LATBbits.LATB6=1;
+    LATBbits.LATB5=1;
+    LATAbits.LATA4=1;
+    
+    ANSELA = 0;//configures pin B4 as digital
+    ANSELB = 0;//configures pin B4 as digital
+
+    TRISA = 0b00000000;      // Configure B Ports as output
+    TRISB = 0b00000000;      // Configure B Ports as output
+    TRISBbits.TRISB15 = 1;
+    TRISBbits.TRISB3 = 1;
+    TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
+    
+    LATBbits.LATB5 = 1;
+    LATBbits.LATB7 = 1;
+    LATBbits.LATB6 = 1;
+    LATBbits.LATB14 = 1;
+}
 
 void initAD(void)
 {
