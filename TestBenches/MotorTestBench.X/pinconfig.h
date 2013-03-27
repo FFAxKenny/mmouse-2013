@@ -2,33 +2,33 @@
 
 
 // Motor Ports
-#define PIN_Motor1_Step         LATBbits.LATB9
-#define PIN_Motor1_Direction    LATBbits.LATB5
+#define __PIN_MotorRStep        LATBbits.LATB9
+#define __PIN_MotorRDir         LATBbits.LATB5
 
-#define PIN_Motor2_Step         LATBbits.LATB8
-#define PIN_Motor2_Direction    LATBbits.LATB6
+#define __PIN_MotorLStep        LATBbits.LATB8
+#define __PIN_MotorLDir         LATBbits.LATB6
 
 // Emitters
-#define PIN_Emitter1            LATAbits.LATA2
-#define PIN_Emitter2            LATAbits.LATA3
-#define PIN_Emitter3            LATBbits.LATB4
-#define PIN_Emitter4            LATAbits.LATA4
-#define PIN_Emitter5            LATBbits.LATB7
-#define PIN_Emitter6            LATBbits.LATB10
+#define __PIN_EmitR45            LATAbits.LATA2
+#define __PIN_EmitR90            LATAbits.LATA3
+#define __PIN_EmitL45            LATBbits.LATB4
+#define __PIN_EmitL90            LATAbits.LATA4
+#define __PIN_EmitF1            LATBbits.LATB7
+#define __PIN_EmitF2            LATBbits.LATB10
 
 // Detectors
-#define PIN_Detector1           
-#define PIN_Detector2
-#define PIN_Detector3
-#define PIN_Detector4
-#define PIN_Detector5 
-#define PIN_Detector6
+#define __PIN_DetectR45
+#define __PIN_DetectR90
+#define __PIN_DetectL45
+#define __PIN_DetectL90
+#define __PIN_DetectF1
+#define __PIN_DetectF1
 
 // Xbee
-#define PIN_XBee_RX
-#define PIN_XBee_TX
+#define __PIN_XBeeRX
+#define __PIN_XBeeTX
 
 // DIP Switch Input
-#define PIN_DIP_Input1
-#define PIN_DIP_Input2
-#define PIN_DIP_Input3
+#define __PIN_DIP_Input1
+#define __PIN_DIP_Input2
+#define __PIN_DIP_Input3
