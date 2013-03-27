@@ -10,6 +10,7 @@
 #include <dsp.h>
 #include <p33Exxxx.h>
 #include "motor.h"
+#include "pinconfig.h"
 
 #define TRUE 1
 #define FALSE 0 
