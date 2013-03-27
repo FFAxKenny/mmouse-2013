@@ -10,6 +10,9 @@
 #include <dsp.h>
 #include <p33Exxxx.h>
 
+#define TRUE 1
+#define FALSE 0 
+
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
@@ -18,10 +21,8 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 //_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 
 long i = 0;
-int motor_pulse1 = 0;
-int motor_pulse2 = 0;
-int step1 = 1;
-int step2 = 1;
+int stepR = TRUE;
+int stepL = TRUE;
 int test;
 float value;
 int corr;
@@ -33,6 +34,14 @@ void delayMicro(unsigned int delay);
 void initAD(void);
 void initPLL(void);
 void initTimer1(void);
+
+typedef struct motor{
+    int step;
+} Motor;
+
+
+Motor lMotor;
+Motor rMotor;
 
 int main()
 {
@@ -89,12 +98,12 @@ int main()
         ADCValue = ADC1BUF0;
 
         if(ADCValue > 60){
-            step2  = 1;
-            step1  = 0; 
+            stepL  = TRUE;
+            stepR  = FALSE; 
         }
         else{
-            step2 = 0;
-            step1  = 1; 
+            stepL = FALSE;
+            stepR  = TRUE; 
         }
 
         // Software Reset
@@ -109,20 +118,20 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
         
-        if(step1 == 1 || correct_offset < 25)
+        if(stepL == 1 || correct_offset < 25)
         {
-            if(motor_pulse1==0)
-                motor_pulse1=1;
+            if(lMotor.step == 0)
+                lMotor.step = 1;
             else
-                motor_pulse1=0;
+                lMotor.step = 0;
         }
 
-        if(step2 == 1 || correct_offset < 25)
+        if(stepR == 1 || correct_offset < 25)
         {
-            if(motor_pulse2==0)
-                motor_pulse2=1;
+            if(rMotor.step == 0)
+                rMotor.step = 1;
             else
-                motor_pulse2=0;
+                rMotor.step = 0;
         }
 
         if(correct_offset < 25)
@@ -135,10 +144,8 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 
         }
 
-        LATBbits.LATB9 = motor_pulse1;
-        LATBbits.LATB8 = motor_pulse2;
-        
-
+        LATBbits.LATB9 = lMotor.step;
+        LATBbits.LATB8 = rMotor.step;
 }
 
 
