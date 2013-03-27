@@ -39,6 +39,9 @@ void initPins(void);
 void initMotors(void);
 void sampleAD(void);
 
+void Motor_step(Motor *m);
+void Motor_init(Motor *m);
+
 int sampleSensor(int sensor);
 
 Motor lMotor;
@@ -185,12 +188,17 @@ void sampleAD(void)
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
 }
+void Motor_init(Motor *m)
+{
+    m->step=1;
+    m->enable=1;
+    m->count=0;
+}
+
 void initMotors(void)
 {
-    lMotor.step = 1;
-    lMotor.enable = TRUE;
-    rMotor.step = 1;
-    rMotor.enable = TRUE;
+    Motor_init(&lMotor);
+    Motor_init(&rMotor);
 }
 void initPins(void)
 {
