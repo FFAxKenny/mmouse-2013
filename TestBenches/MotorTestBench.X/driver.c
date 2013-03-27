@@ -9,6 +9,7 @@
 #include <xc.h>
 #include <dsp.h>
 #include <p33Exxxx.h>
+#include "motor.h"
 
 #define TRUE 1
 #define FALSE 0 
@@ -21,6 +22,7 @@
 #define F2_SENSOR   5
 
 
+
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 //_FWDT(FWDTEN_OFF);
@@ -28,16 +30,10 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
 //_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 
 long i = 0;
-int stepR = TRUE;
-int stepL = TRUE;
-int test;
-float value;
-int corr;
-int ADCValue;
 int correct_offset = 0;
-int error_offset = 0;
 
 void delayMicro(unsigned int delay);
+
 void initAD(void);
 void initPLL(void);
 void initTimer1(void);
@@ -46,17 +42,13 @@ void initMotors(void);
 
 int sampleSensor(int sensor);
 
-typedef struct motor{
-    int step;
-    int enable;
-} Motor;
-
 Motor lMotor;
 Motor rMotor;
 
 int main()
 {
     double k;
+    int ADCValue;
 
     // Init stuff
     initMotors();
