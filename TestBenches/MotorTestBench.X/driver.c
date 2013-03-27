@@ -183,12 +183,6 @@ void sampleAD(void)
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
 }
-void Motor_init(Motor *m)
-{
-    m->step=1;
-    m->enable=1;
-    m->count=0;
-}
 
 void initMotors(void)
 {
