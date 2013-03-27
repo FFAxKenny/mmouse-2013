@@ -22,7 +22,7 @@
 #define F1_SENSOR   4
 #define F2_SENSOR   5
 
-#define CELL_DISTANCE 200
+#define CELL_DISTANCE 1000
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
@@ -41,6 +41,8 @@ void sampleAD(void);
 
 void Motor_step(Motor *m);
 void Motor_init(Motor *m);
+void Motor_enable(Motor *m);
+void Motor_disable(Motor *m);
 
 int sampleSensor(int sensor);
 
@@ -72,14 +74,13 @@ int main()
     {
         ADCValue = sampleSensor(L45_SENSOR);
 
-        if(ADCValue > 60){
-            lMotor.enable = TRUE;
-            rMotor.enable = FALSE; 
+        while(lMotor.count < CELL_DISTANCE)
+        {
+            Motor_enable(&lMotor);
+            Motor_enable(&rMotor);
         }
-        else{
-            lMotor.enable = FALSE;
-            rMotor.enable = TRUE; 
-        }
+
+        __asm__ volatile ("reset");
 
         // Software Reset
         if(PORTBbits.RB15 == 1)
@@ -95,7 +96,17 @@ void Motor_step(Motor *m)
         m->step = 0;
     else
         m->step = 1;
+    m->count++;
 }
+void Motor_enable(Motor *m)
+{
+    m->enable = 1;
+}
+void Motor_disable(Motor *m)
+{
+    m->enable = 0;
+}
+
     
 
 int calcError(int value1, int value2)
