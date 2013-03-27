@@ -52,10 +52,8 @@ int main()
     initPLL();
     initAD();
 
-    while(ADCValue < 50)            // Wait for input
-        ADCValue = sampleSensor(R45_SENSOR);
-     
-    for(k = 0; k< 150000; k++);     // Delay
+    while( sampleSensor(R45_SENSOR < 50) );         // Wait for input
+    for(k = 0; k< 150000; k++);                     // Delay
 
     /********************************
      *      Main Body 
