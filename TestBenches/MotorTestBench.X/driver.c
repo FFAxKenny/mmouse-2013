@@ -42,6 +42,7 @@ void initAD(void);
 void initPLL(void);
 void initTimer1(void);
 void initPins(void);
+void initMotors(void);
 
 int sampleSensor(int sensor);
 
@@ -55,28 +56,23 @@ Motor rMotor;
 
 int main()
 {
-    double k = 40000;
-    
-    lMotor.step = 1;
-    lMotor.enable = TRUE;
-    rMotor.step = 1;
-    rMotor.enable = TRUE;
+    double k;
 
-    
     // Init stuff
+    initMotors();
     initPins();
     initTimer1();
     initPLL();
     initAD();
 
     while(ADCValue < 50)            // Wait for input
-    {
         ADCValue = sampleSensor(R45_SENSOR);
-    }
      
-    for(k = 0; k< 150000; k++);
+    for(k = 0; k< 150000; k++);     // Delay
+
     /********************************
-     *      Main Body ********************************/ 
+     *      Main Body 
+     ********************************/ 
     LATBbits.LATB14 = 0;     // Enable Motors
     T1CONbits.TON = 1;       // Enable Timer
 
@@ -102,8 +98,7 @@ int main()
 
 }
 
-void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
-{
+void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
         
         if( lMotor.enable || correct_offset < 25){
@@ -132,11 +127,27 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         // B8 is the left motor
 }
 
+
 int sampleSensor(int sensor)
 {
     switch(sensor)
     {
         case R45_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+        case R90_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+        case L45_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+        case L90_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+        case F1_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+        case F2_SENSOR:
             AD1CHS0 = 0x0005;               
             break;
     }
@@ -149,6 +160,14 @@ int sampleSensor(int sensor)
 
 }
 
+
+void initMotors(void)
+{
+    lMotor.step = 1;
+    lMotor.enable = TRUE;
+    rMotor.step = 1;
+    rMotor.enable = TRUE;
+}
 
 void initPins(void)
 {
