@@ -13,6 +13,13 @@
 #define TRUE 1
 #define FALSE 0 
 
+#define L90_SENSOR  0
+#define R90_SENSOR  1
+#define L45_SENSOR  2
+#define R45_SENSOR  3
+#define F1_SENSOR   4
+#define F2_SENSOR   5
+
 
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
@@ -35,8 +42,11 @@ void initAD(void);
 void initPLL(void);
 void initTimer1(void);
 
+int sampleSensor(int sensor);
+
 typedef struct motor{
     int step;
+    int enable;
 } Motor;
 
 
@@ -46,6 +56,11 @@ Motor rMotor;
 int main()
 {
     double k = 40000;
+    
+    lMotor.step = 1;
+    lMotor.enable = TRUE;
+    rMotor.step = 1;
+    rMotor.enable = TRUE;
 
     /**************************
     **      PIN SETUP
@@ -76,11 +91,7 @@ int main()
 
     while(ADCValue < 50)            // Wait for input
     {
-        delayMicro(100);
-        AD1CON1bits.SAMP = 0;
-        while (!AD1CON1bits.DONE);
-        AD1CON1bits.DONE = 0;
-        ADCValue = ADC1BUF0;
+        ADCValue = sampleSensor(R45_SENSOR);
     }
      
     for(k = 0; k< 150000; k++);
@@ -91,24 +102,21 @@ int main()
 
     while(1)
     {
-        delayMicro(100);
-        AD1CON1bits.SAMP = 0;
-        while (!AD1CON1bits.DONE);
-        AD1CON1bits.DONE = 0;
-        ADCValue = ADC1BUF0;
+        ADCValue = sampleSensor(R45_SENSOR);
 
         if(ADCValue > 60){
-            stepL  = TRUE;
-            stepR  = FALSE; 
+            lMotor.enable  = TRUE;
+            rMotor.enable  = FALSE; 
         }
         else{
-            stepL = FALSE;
-            stepR  = TRUE; 
+            lMotor.enable = FALSE;
+            rMotor.enable  = TRUE; 
         }
 
         // Software Reset
         if(PORTBbits.RB15 == 1)
             __asm__ volatile ("reset");
+
     }
 
 
@@ -118,16 +126,14 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
 {
         _T1IF = 0;      // Reset the timer flag
         
-        if(stepL == 1 || correct_offset < 25)
-        {
+        if( lMotor.enable || correct_offset < 25){
             if(lMotor.step == 0)
                 lMotor.step = 1;
             else
                 lMotor.step = 0;
         }
 
-        if(stepR == 1 || correct_offset < 25)
-        {
+        if( rMotor.enable || correct_offset < 25){
             if(rMotor.step == 0)
                 rMotor.step = 1;
             else
@@ -135,17 +141,32 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
         }
 
         if(correct_offset < 25)
-        {
             correct_offset++;
-        }
         else
-        {
             correct_offset = 0;
 
-        }
+        LATBbits.LATB9 = rMotor.step;   // Update right motor state
+        LATBbits.LATB8 = lMotor.step;   // Update left motor state
 
-        LATBbits.LATB9 = lMotor.step;
-        LATBbits.LATB8 = rMotor.step;
+        // B9 is the right motor
+        // B8 is the left motor
+}
+
+int sampleSensor(int sensor)
+{
+    switch(sensor)
+    {
+        case R45_SENSOR:
+            AD1CHS0 = 0x0005;               
+            break;
+    }
+
+    delayMicro(100);
+    AD1CON1bits.SAMP = 0;
+    while (!AD1CON1bits.DONE);
+    AD1CON1bits.DONE = 0;
+    return ADC1BUF0;
+
 }
 
 
