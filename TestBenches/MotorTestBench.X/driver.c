@@ -106,8 +106,8 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         else
             correct_offset = 0;
 
-        __PIN_MotorR = rMotor.step;   // Update right motor state
-        __PIN_MotorL = lMotor.step;   // Update left motor state
+        __PIN_MotorRStep = rMotor.step;   // Update right motor state
+        __PIN_MotorLStep = lMotor.step;   // Update left motor state
 
         // B9 is the right motor
         // B8 is the left motor
