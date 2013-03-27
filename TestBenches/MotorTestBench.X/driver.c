@@ -35,6 +35,7 @@ void initPLL(void);
 void initTimer1(void);
 void initPins(void);
 void initMotors(void);
+void sampleAD(void);
 
 int sampleSensor(int sensor);
 
@@ -53,7 +54,7 @@ int main()
     initPLL();
     initAD();
 
-    while( sampleSensor(R45_SENSOR) < 50 );         // Wait for input
+    while( sampleSensor(L45_SENSOR) < 50 );         // Wait for input
     for(k = 0; k< 150000; k++);                     // Delay
 
     /********************************
@@ -64,7 +65,7 @@ int main()
 
     while(1)
     {
-        ADCValue = sampleSensor(R45_SENSOR);
+        ADCValue = sampleSensor(L45_SENSOR);
 
         if(ADCValue > 60){
             lMotor.enable  = TRUE;
@@ -122,39 +123,58 @@ int sampleSensor(int sensor)
         case R45_SENSOR:
             AD1CHS0 = 0x0005;               
             __PIN_EmitR45 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitR45 = 0;
             break;
         case R90_SENSOR:
             AD1CHS0 = 0x0005;               
+            __PIN_EmitR90 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitR90 = 0;
             break;
         case L45_SENSOR:
             AD1CHS0 = 0x0004;               
             __PIN_EmitL45 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitL45 = 0;
             break;
         case L90_SENSOR:
             AD1CHS0 = 0x0005;               
+            __PIN_EmitL90 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitL90 = 0;
             break;
         case F1_SENSOR:
             AD1CHS0 = 0x0005;               
+            __PIN_EmitF1 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitF1 = 0;
             break;
         case F2_SENSOR:
             AD1CHS0 = 0x0005;               
+            __PIN_EmitF2 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitF2 = 0;
             break;
     }
-    
+    return ADC1BUF0;
+}
+
+void sampleAD(void)
+{
     // Actually sample
     AD1CON1bits.ADON = 1;
     delayMicro(100);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
-
-    __PIN_EmitR45 = 0;
-    __PIN_EmitL45 = 0;
-    return ADC1BUF0;
-
 }
-
-
 void initMotors(void)
 {
     lMotor.step = 1;
@@ -176,6 +196,7 @@ void initPins(void)
     TRISB = 0b00000000;      // Configure B Ports as output
     TRISBbits.TRISB15 = 1;
     TRISBbits.TRISB3 = 1;
+    TRISBbits.TRISB2 = 1;
     TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
     
     LATBbits.LATB5 = 1;
