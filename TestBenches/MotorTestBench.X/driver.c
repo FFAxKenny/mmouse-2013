@@ -270,9 +270,9 @@ void initTimer1(void)
 
 }
 
-/*
- *          MISC Functions
- */ 
+/*********************************************************************
+ *     Initialization Functions 
+ *********************************************************************/ 
 void delayMicro(unsigned int delay)
 {
 
