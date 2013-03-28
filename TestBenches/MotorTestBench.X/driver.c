@@ -9,12 +9,16 @@
 #include <xc.h>
 #include <dsp.h>
 #include <p33Exxxx.h>
+
+// User Created H Files
 #include "motor.h"
 #include "pinconfig.h"
 
+// True False Definitions
 #define TRUE 1
 #define FALSE 0 
 
+// Definitions for Analog to Digital Conversion
 #define L90_SENSOR  0
 #define R90_SENSOR  1
 #define L45_SENSOR  2
@@ -24,8 +28,9 @@
 
 #define CELL_DISTANCE 1000
 
-_FOSCSEL(FNOSC_FRC & IESO_OFF);
-_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);
+// Configuration Options
+_FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);   // Some other stuff
 
 long i = 0;
 int correct_offset = 0;
@@ -39,13 +44,9 @@ void initPins(void);
 void initMotors(void);
 void sampleAD(void);
 
-void Motor_step(Motor *m);
-void Motor_init(Motor *m);
-void Motor_enable(Motor *m);
-void Motor_disable(Motor *m);
-
 int sampleSensor(int sensor);
 
+// Declare the motors
 Motor lMotor;
 Motor rMotor;
 
@@ -64,17 +65,15 @@ int main()
     while( sampleSensor(L45_SENSOR) < 50 );         // Wait for start input
     for(k = 0; k< 150000; k++);                     // Delay 
 
+    LATBbits.LATB14 = 0;                            // Enable Motors
+    T1CONbits.TON = 1;                              // Enable Timer
 
     /********************************
      *      Main Body 
      ********************************/ 
-    LATBbits.LATB14 = 0;     // Enable Motors
-    T1CONbits.TON = 1;       // Enable Timer
-
     while(1)
     {
         ADCValue = sampleSensor(L45_SENSOR);
-
         while(lMotor.count < CELL_DISTANCE)
         {
             Motor_enable(&lMotor);
@@ -93,7 +92,7 @@ int main()
 }
 
 /*********************************************************************
- *      Interrupt Service Routine
+ *      Interrupt Service Routine 1
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
