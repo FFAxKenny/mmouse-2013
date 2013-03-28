@@ -61,8 +61,9 @@ int main()
     initPLL();
     initAD();
 
-    while( sampleSensor(L45_SENSOR) < 50 );         // Wait for input
-    for(k = 0; k< 150000; k++);                     // Delay
+    while( sampleSensor(L45_SENSOR) < 50 );         // Wait for start input
+    for(k = 0; k< 150000; k++);                     // Delay 
+
 
     /********************************
      *      Main Body 
@@ -91,16 +92,9 @@ int main()
 
 }
 
-    
-
-int calcError(int value1, int value2)
-{
-
-    return value1 - value2;
-
-}
-
-
+/*********************************************************************
+ *      Interrupt Service Routine
+ *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
         
@@ -122,7 +116,9 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         // B8 is the left motor
 }
 
-
+/*********************************************************************
+ *      Analog to Digital Functions
+ *********************************************************************/ 
 int sampleSensor(int sensor)
 {
     AD1CON1bits.ADON = 0;
@@ -184,6 +180,10 @@ void sampleAD(void)
     AD1CON1bits.DONE = 0;
 }
 
+
+/*********************************************************************
+ *     Initialization Functions 
+ *********************************************************************/ 
 void initMotors(void)
 {
     Motor_init(&lMotor);
@@ -213,9 +213,6 @@ void initPins(void)
 
 void initAD(void)
 {
-    /**************************************
-     *      Analog to Digital Configuration
-     **************************************/
     ANSELAbits.ANSA0 = 1;         // Set pin A0 as analog 
     ANSELBbits.ANSB0 = 1;         // Set pin A0 as analog 
     ANSELBbits.ANSB1 = 1;         // Set pin A0 as analog 
@@ -233,7 +230,6 @@ void initAD(void)
     //AD1CON1bits.ADON = 1;
 
     delayMicro(20);
-
 }
 
 
@@ -259,7 +255,6 @@ void initPLL(void)
 
 }
 
-
 void initTimer1(void)
 {
     /********************************
@@ -276,7 +271,9 @@ void initTimer1(void)
 
 }
 
-
+/*
+ *          MISC Functions
+ */ 
 void delayMicro(unsigned int delay)
 {
 
