@@ -35,16 +35,15 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);   // Some other stuff
 long i = 0;
 int correct_offset = 0;
 
-void delayMicro(unsigned int delay);
 
-void initAD(void);
+void initAD(void);                                  // Init Functions
 void initPLL(void);
 void initTimer1(void);
 void initPins(void);
 void initMotors(void);
+int sampleSensor(int sensor);                       // Analog to digital
 void sampleAD(void);
-
-int sampleSensor(int sensor);
+void delayMicro(unsigned int delay);                // Misc
 
 // Declare the motors
 Motor lMotor;
