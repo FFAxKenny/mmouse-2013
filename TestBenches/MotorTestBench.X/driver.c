@@ -64,7 +64,7 @@ int main()
     initPLL();
     initAD();
     
-    while( sampleSensor(F1_SENSOR) < 500 );         // Wait for start input
+    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
     for(k = 0; k< 150000; k++);                     // Delay 
 
     LATBbits.LATB14 = 0;                            // Enable Motors
