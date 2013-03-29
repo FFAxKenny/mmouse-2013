@@ -1,9 +1,10 @@
 #include "motor.h"
 void Motor_init(Motor *m)
 {
-    m->step=1;
-    m->enable=1;
-    m->count=0;
+    m->step = 1;
+    m->enable = 1;
+    m->count = 0;
+    m->speed = 0;
 }
 void Motor_step(Motor *m)
 {
