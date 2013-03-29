@@ -288,7 +288,7 @@ void turn90(int direction)
     int yay;
     int pay;
     int j;
-    PR1 = 12000;             // Set the timer
+    PR1 = 11000;             // Set the timer
 
     if(direction == RIGHT){
         lMotor.dir = 0;
@@ -623,7 +623,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 10000;             // Set the timer
+    PR1 = 9500;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
