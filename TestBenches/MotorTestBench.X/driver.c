@@ -17,8 +17,11 @@
 // True False Definitions
 #define TRUE    1
 #define FALSE   0 
-#define ON    1
-#define OFF   0
+#define ON      1
+#define OFF     0
+
+#define LEFT    0
+#define RIGHT   1
 
 // Definitions for Analog to Digital Conversion
 #define L90_SENSOR  0
@@ -28,27 +31,41 @@
 #define F1_SENSOR   4
 #define F2_SENSOR   5
 
-#define CELL_DISTANCE 50
+#define SENSOR_OFFSET 
+
+#define CELL_DISTANCE 363
+#define DISTANCE_360 240
+#define DISTANCE_90  116
+
+#define RIGHT_THRESHOLD         30
+#define LEFT_THRESHOLD          30
+#define NOMINAL_RIGHT_VALUE     130
+#define NOMINAL_LEFT_VALUE      141
+
 #pragma config ICS = PGD2
 
 // Configuration Options
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
 _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
+int CORRECT_DISTANCE = 10;
 long i = 0;
 int correct_offset = 0;
 int error = 0;
 
 int right = 0;
 int left = 0;
+int front = 0;
 int front_left = 0;
 int front_right = 0;
 
-int correct_interval = 15;
+int correct_interval = 5;
 
 void allEmitters(int state);
 void powerMotors(int state);
 void powerEmitters(int state);
+
+void moveCell(int n);
 
 void initAD(void);                                  // Init Functions
 void initPLL(void);
@@ -59,9 +76,25 @@ int sampleSensor(int sensor);                       // Analog to digital
 void sampleAD(void);
 void delayMicro(unsigned int delay);                // Misc
 
+void turn90(int direction);
+void turn180(int direction);
+
+void realign(int n);
+
+inline void enableTimer(int n);
+inline void disableTimer(int n);
 inline void waitForStart(void);
 inline void powerEmitters(int state);
 inline void powerMotors(int state);
+
+void updateMotorStates(void);
+
+int correctCount = 0;
+
+int errorOffset = 0;
+
+int nominalRightValue = 0;
+int nominalLeftValue = 0;
 
 // Declare the motors
 Motor lMotor;
@@ -79,33 +112,278 @@ int main()
     initPLL();
     initAD();
     
+
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
-    
+   
+    // Clear the Buffer 
     ADC1BUF0 = 0;
-
+    nominalLeftValue = 133;
+    nominalRightValue = 125;
+    left = sampleSensor(L90_SENSOR);
+    right = sampleSensor(R90_SENSOR);
+    front = sampleSensor(F1_SENSOR);
     powerMotors(ON);
-    T1CONbits.TON = 1;                              // Enable Timer
+    enableTimer(1);
 
     
     /********************************
-     *      Main Body 
+     *      Wall Hugger Algorithm
      ********************************/ 
     while(1)
     {
-        error = sampleSensor(R90_SENSOR) - sampleSensor(L90_SENSOR);
-        while(lMotor.count < CELL_DISTANCE)
+        // Move forward one cell and track
+        int temp;
+        int j; 
+        int yay; 
+
+        int k;
+
+
+        while(1){
+
+            if(left < 35){
+                turn90(0);
+                moveCell(1);
+            }
+            else{
+                if(front < 60){         // Open Front
+                    moveCell(1);
+                }
+                else                    // Closed Front
+                {
+                    if(right < 50){     // Open right
+                        // Turn right
+                        turn90(1);
+                        moveCell(1);
+                    }
+                    else{
+                        // turn around
+                        turn180(1);
+                        moveCell(1);
+                    }
+                }
+            }
+
+        }
+        // Software Reset
+        //if(PORTBbits.RB15 == 1)
+            //__asm__ volatile ("reset");
+    }
+}
+void realign(int n)
+{
+
+    int frontL = sampleSensor(F1_SENSOR);
+    int frontR = sampleSensor(F2_SENSOR);
+    int error = frontL - frontR;
+
+    Motor_disable(&lMotor);
+    Motor_disable(&rMotor);
+
+
+    // Backup if too close
+    if( (frontL + frontR) /2 > 700)
+    {
+        while( sampleSensor(F1_SENSOR) > 700)
         {
-            Motor_enable(&lMotor);
-            Motor_enable(&rMotor);
-        } 
+            lMotor.dir = 0;
+            rMotor.dir = 0;
+        }
+            lMotor.dir = 1;
+            rMotor.dir = 1;
+    }
+
+
+    /*
+    if( error > 0 )         // if the mouse is leaning to the right
+    {
+        while(sampleSensor(F1_SENSOR) > sampleSensor(F2_SENSOR))
+        {
+            lMotor.dir = 0;
+            lMotor.enable = 1;
+            rMotor.enable = 1;
+        }
+
+    }
+    else if(error < 0)      // if mouse is learning to left
+    {
+        while(sampleSensor(F2_SENSOR) > sampleSensor(F1_SENSOR))
+        {
+            rMotor.dir = 0;
+            rMotor.enable = 1;
+            lMotor.enable = 1;
+        }
+
+    }
+    else
+    {
+
+    }
+    */
+
+    rMotor.dir = 1;
+    lMotor.dir = 1;
+}
+
+
+
+
+void moveCell(int n)
+{
+    int i; 
+    int temp;
+    long whoo;
+
+    for(i = 0; i < n ; i++ )
+    {
+        temp = lMotor.count;
+        while( (lMotor.count - temp) < CELL_DISTANCE) {
+            
+            // Sample and correct
+            correctCount = lMotor.count;
+            while( (lMotor.count - correctCount) < CORRECT_DISTANCE){
+                if(sampleSensor(F1_SENSOR) > 800)
+                    break;
+                Motor_enable(&lMotor);
+                Motor_enable(&rMotor);
+            } 
+            if(sampleSensor(F1_SENSOR) > 800)
+                break;
+            int r = sampleSensor(R90_SENSOR);
+            int l = sampleSensor(L90_SENSOR);
+
+            if( (lMotor.count - temp) < (CELL_DISTANCE/2 + 50) )
+            {
+                left = sampleSensor(L90_SENSOR);
+                right = sampleSensor(R90_SENSOR);
+                front = sampleSensor(F1_SENSOR);
+            }
+
+            if( r > RIGHT_THRESHOLD && l > LEFT_THRESHOLD)
+                error = r - NOMINAL_RIGHT_VALUE;
+            else if( r < RIGHT_THRESHOLD && l > LEFT_THRESHOLD)     // gap on the right
+                error = NOMINAL_LEFT_VALUE - l;                       // track using left
+            else if( r > RIGHT_THRESHOLD && l < LEFT_THRESHOLD)     // gap on the left 
+                error = r - NOMINAL_RIGHT_VALUE;                    // track using right wall
+            else            // Pray
+                error = 0;
+
+        }
 
         Motor_disable(&lMotor);
         Motor_disable(&rMotor);
+            __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+        Motor_enable(&lMotor);
+        Motor_enable(&rMotor);
 
-        // Software Reset
-        if(PORTBbits.RB15 == 1)
-            __asm__ volatile ("reset");
+    }
+}
+
+void turn90(int direction)
+{
+    int temp;
+    int yay;
+    int pay;
+    int j;
+    PR1 = 12000;             // Set the timer
+
+    if(direction == RIGHT){
+        lMotor.dir = 0;
+        rMotor.dir = 1;
+    }
+    else if(direction == LEFT){
+        lMotor.dir = 1;
+        rMotor.dir = 0;
+    }
+
+    Motor_disable(&lMotor);
+    Motor_disable(&rMotor);
+
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+
+
+    Motor_enable(&lMotor);
+    Motor_enable(&rMotor);
+
+    temp = lMotor.count;
+    while( (lMotor.count - temp ) < DISTANCE_90);
+    lMotor.dir = 1;
+    rMotor.dir = 1;
+
+    Motor_disable(&lMotor);
+    Motor_disable(&rMotor);
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    Motor_enable(&lMotor);
+    Motor_enable(&rMotor);
+
+    int temp9 = lMotor.count;
+    while((lMotor.count - temp9) < 70)
+    {
+        lMotor.dir = 0;
+        rMotor.dir = 0;
+    }
+
+    lMotor.dir = 1;
+    rMotor.dir = 1;
+    
+    Motor_disable(&lMotor);
+    Motor_disable(&rMotor);
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    Motor_enable(&lMotor);
+    Motor_enable(&rMotor);
+
+
+    PR1 = 12000;             // Set the timer
+}
+
+void turn180(int direction)
+{
+    turn90(direction);
+    turn90(direction);
+}
+
+void enableTimer(int n)
+{
+    switch(n)
+    {
+        case 1: 
+                T1CONbits.TON = 1;                              // Enable Timer
+                break;
+        case 2:
+                break;
+        case 3:
+                break;
+        case 4:
+                break;
+        default:
+                break;
+    }
+}
+
+void disableTimer(int n)
+{
+    switch(n)
+    {
+        case 1: 
+                T1CONbits.TON = 0;                              // Enable Timer
+                break;
+        case 2:
+                break;
+        case 3:
+                break;
+        case 4:
+                break;
+        default:
+                break;
     }
 }
 
@@ -113,45 +391,58 @@ int main()
  *      Interrupt Service Routine 1
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
-        
         _T1IF = 0;      // Reset the timer flag
-        if(correct_offset == correct_interval)
+        
+        // If the motors are enabled, step them
+        if(lMotor.enable && rMotor.enable)
         {
-            if(error > 0){
-                Motor_step(&lMotor);
-                error--;
-            }
+            // If it is time to correct the motors
+            if(correct_offset == correct_interval){
+                if(error > 0){
+                    Motor_step(&lMotor);
+                    error--;
+                }
 
-            else if(error < 0){
-                Motor_step(&rMotor);
-                error++;
-            }
+                else if(error < 0){
+                    Motor_step(&rMotor);
+                    error++;
+                }
 
-            else if(error == 0){
+                else if(error == 0){
+                    Motor_step(&lMotor);
+                    Motor_step(&rMotor);
+                }
+                correct_offset = 0;
+            }
+            // If it is not time to correct the motors
+            else if (correct_offset < correct_interval){
                 Motor_step(&lMotor);
                 Motor_step(&rMotor);
+                correct_offset++;
             }
-            correct_offset = 0;
         }
         else
         {
-            Motor_step(&lMotor);
-            Motor_step(&rMotor);
+            // Do nothing
         }
 
-        correct_offset++;
 
-        __PIN_MotorRStep = rMotor.step;   // Update right motor state
-        __PIN_MotorLStep = lMotor.step;   // Update left motor state
-
-        // B9 is the right motor
-        // B8 is the left motor
+        updateMotorStates();
 }
+
+void updateMotorStates(void)
+{
+    __PIN_MotorRStep = rMotor.step;   // Update right motor state
+    __PIN_MotorLStep = lMotor.step;   // Update left motor state
+    __PIN_MotorRDir = rMotor.dir;
+    __PIN_MotorLDir = lMotor.dir;
+}
+
 /*********************************************************************
  *      Routine Functions
  *********************************************************************/ 
 inline void waitForStart(void){
-    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
+    while( sampleSensor(R90_SENSOR) < 400 );         // Wait for start input
 }
 inline void powerEmitters(int state){
 
@@ -220,7 +511,7 @@ void sampleAD(void)
 {
     // Actually sample
     AD1CON1bits.ADON = 1;
-    delayMicro(100);
+    delayMicro(20);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
@@ -332,7 +623,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 7000;             // Set the timer
+    PR1 = 10000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
