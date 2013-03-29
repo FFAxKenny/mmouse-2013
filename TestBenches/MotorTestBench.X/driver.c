@@ -38,6 +38,8 @@ long i = 0;
 int correct_offset = 0;
 
 void allEmitters(int state);
+void powerMotors(int state);
+void powerEmitters(int state);
 
 void initAD(void);                                  // Init Functions
 void initPLL(void);
@@ -64,10 +66,10 @@ int main()
     initPLL();
     initAD();
     
-    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
+    waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
 
-    LATBbits.LATB14 = 0;                            // Enable Motors
+    powerMotors(__ON);
     T1CONbits.TON = 1;                              // Enable Timer
 
     /********************************
@@ -92,6 +94,8 @@ int main()
 
 }
 
+
+
 /*********************************************************************
  *      Interrupt Service Routine 1
  *********************************************************************/ 
@@ -114,6 +118,18 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
 
         // B9 is the right motor
         // B8 is the left motor
+}
+/*********************************************************************
+ *      Routine Functions
+ *********************************************************************/ 
+inline void waitForStart(void){
+    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
+}
+inline void powerEmitters(int state){
+
+}
+inline void powerMotors(int state){
+    LATBbits.LATB14 = 0;                            // Enable Motors
 }
 
 /*********************************************************************
@@ -208,7 +224,8 @@ void initPins(void)
     TRISBbits.TRISB3 = 1;
     TRISBbits.TRISB2 = 1;
 
-    TRISAbits.TRISA0  = 1;   // Configure Phototransistor Pins
+    // Configure Phototransistor Pins
+    TRISAbits.TRISA0  = 1;   
     TRISAbits.TRISA1  = 1;   
     TRISBbits.TRISB0  = 1;   
     TRISBbits.TRISB1  = 1;  
