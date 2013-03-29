@@ -15,8 +15,10 @@
 #include "pinconfig.h"
 
 // True False Definitions
-#define TRUE 1
-#define FALSE 0 
+#define TRUE    1
+#define FALSE   0 
+#define __ON    1
+#define __OFF   0
 
 // Definitions for Analog to Digital Conversion
 #define L90_SENSOR  0
@@ -35,6 +37,7 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 long i = 0;
 int correct_offset = 0;
 
+void allEmitters(int state);
 
 void initAD(void);                                  // Init Functions
 void initPLL(void);
@@ -60,8 +63,8 @@ int main()
     initTimer1();
     initPLL();
     initAD();
-
-    while( sampleSensor(L45_SENSOR) < 50 );         // Wait for start input
+    
+    while( sampleSensor(F1_SENSOR) < 500 );         // Wait for start input
     for(k = 0; k< 150000; k++);                     // Delay 
 
     LATBbits.LATB14 = 0;                            // Enable Motors
@@ -72,13 +75,12 @@ int main()
      ********************************/ 
     while(1)
     {
-        ADCValue = sampleSensor(L45_SENSOR);
+        ADCValue = sampleSensor(L90_SENSOR);
         while(lMotor.count < CELL_DISTANCE)
         {
             Motor_enable(&lMotor);
             Motor_enable(&rMotor);
-        }
-
+        } 
         __asm__ volatile ("reset");
 
         // Software Reset
@@ -122,40 +124,27 @@ int sampleSensor(int sensor)
     AD1CON1bits.ADON = 0;
     switch(sensor)
     {
-        case R45_SENSOR:
-            AD1CHS0 = 0x0005;               
-            __PIN_EmitR45 = 1;
-            AD1CON1bits.ADON = 1;
-            sampleAD();
-            __PIN_EmitR45 = 0;
-            break;
-        case R90_SENSOR:
-            AD1CHS0 = 0x0005;               
-            __PIN_EmitR90 = 1;
-            AD1CON1bits.ADON = 1;
-            sampleAD();
-            __PIN_EmitR90 = 0;
-            break;
-        case L45_SENSOR:
-            AD1CHS0 = 0x0004;               
-            __PIN_EmitL45 = 1;
-            AD1CON1bits.ADON = 1;
-            sampleAD();
-            __PIN_EmitL45 = 0;
-            break;
         case L90_SENSOR:
-            AD1CHS0 = 0x0005;               
+            AD1CHS0 = 0x0003;                 
             __PIN_EmitL90 = 1;
             AD1CON1bits.ADON = 1;
             sampleAD();
             __PIN_EmitL90 = 0;
             break;
         case F1_SENSOR:
-            AD1CHS0 = 0x0005;               
+            AD1CHS0 = 0x0002;               
             __PIN_EmitF1 = 1;
             AD1CON1bits.ADON = 1;
             sampleAD();
             __PIN_EmitF1 = 0;
+            break;
+
+        case R90_SENSOR:
+            AD1CHS0 = 0x0004;               
+            __PIN_EmitR90 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitR90 = 0;
             break;
         case F2_SENSOR:
             AD1CHS0 = 0x0005;               
@@ -163,6 +152,21 @@ int sampleSensor(int sensor)
             AD1CON1bits.ADON = 1;
             sampleAD();
             __PIN_EmitF2 = 0;
+            break;
+
+        case R45_SENSOR:
+            AD1CHS0 = 0x0005;               
+            __PIN_EmitR45 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitR45 = 0;
+            break;
+        case L45_SENSOR:
+            AD1CHS0 = 0x0004;               
+            __PIN_EmitL45 = 1;
+            AD1CON1bits.ADON = 1;
+            sampleAD();
+            __PIN_EmitL45 = 0;
             break;
     }
     return ADC1BUF0;
@@ -199,15 +203,38 @@ void initPins(void)
 
     TRISA = 0b00000000;      // Configure B Ports as output
     TRISB = 0b00000000;      // Configure B Ports as output
+
     TRISBbits.TRISB15 = 1;
     TRISBbits.TRISB3 = 1;
     TRISBbits.TRISB2 = 1;
-    TRISAbits.TRISA0  = 1;   // Configure A0 as an input   
+
+    TRISAbits.TRISA0  = 1;   // Configure Phototransistor Pins
+    TRISAbits.TRISA1  = 1;   
+    TRISBbits.TRISB0  = 1;   
+    TRISBbits.TRISB1  = 1;  
+    TRISBbits.TRISB2  = 1;  
+    TRISBbits.TRISB3  = 1;  
     
     LATBbits.LATB5 = 1;
     LATBbits.LATB6 = 1;
     LATBbits.LATB14 = 1;
+
+
+    // Make sure that the emitters are off
+    allEmitters(__OFF);
+    
 }
+void allEmitters(int state)
+{
+    LATAbits.LATA2 = state;             // L90
+    LATAbits.LATA3 = state;             // FL
+    LATBbits.LATB4 = state;             // FR
+    LATAbits.LATA4 = state;             // R90
+    LATBbits.LATB4 = state;
+    LATBbits.LATB10 = state;
+}
+
+
 
 void initAD(void)
 {
