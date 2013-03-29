@@ -17,8 +17,8 @@
 // True False Definitions
 #define TRUE    1
 #define FALSE   0 
-#define __ON    1
-#define __OFF   0
+#define ON    1
+#define OFF   0
 
 // Definitions for Analog to Digital Conversion
 #define L90_SENSOR  0
@@ -45,6 +45,8 @@ int front_left = 0;
 int front_right = 0;
 
 void allEmitters(int state);
+void powerMotors(int state);
+void powerEmitters(int state);
 
 void initAD(void);                                  // Init Functions
 void initPLL(void);
@@ -70,13 +72,13 @@ int main()
     initTimer1();
     initPLL();
     initAD();
-
-    while( sampleSensor(F1_SENSOR) < 400 );         // Wait for start input
+    
+    waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
     
     ADC1BUF0 = 0;
 
-    LATBbits.LATB14 = 0;                            // Enable Motors
+    powerMotors(ON);
     T1CONbits.TON = 1;                              // Enable Timer
 
     
@@ -99,8 +101,6 @@ int main()
         if(PORTBbits.RB15 == 1)
             __asm__ volatile ("reset");
     }
-
-
 }
 
 /*********************************************************************
@@ -143,6 +143,18 @@ void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
 
         // B9 is the right motor
         // B8 is the left motor
+}
+/*********************************************************************
+ *      Routine Functions
+ *********************************************************************/ 
+inline void waitForStart(void){
+    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
+}
+inline void powerEmitters(int state){
+
+}
+inline void powerMotors(int state){
+    LATBbits.LATB14 = 0;                            // Enable Motors
 }
 
 /*********************************************************************
@@ -237,7 +249,8 @@ void initPins(void)
     TRISBbits.TRISB3 = 1;
     TRISBbits.TRISB2 = 1;
 
-    TRISAbits.TRISA0  = 1;   // Configure Phototransistor Pins
+    // Configure Phototransistor Pins
+    TRISAbits.TRISA0  = 1;   
     TRISAbits.TRISA1  = 1;   
     TRISBbits.TRISB0  = 1;   
     TRISBbits.TRISB1  = 1;  
