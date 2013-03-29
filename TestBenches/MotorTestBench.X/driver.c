@@ -28,7 +28,8 @@
 #define F1_SENSOR   4
 #define F2_SENSOR   5
 
-#define CELL_DISTANCE 1000
+#define CELL_DISTANCE 50
+#pragma config ICS = PGD2
 
 // Configuration Options
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
@@ -36,6 +37,12 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
 long i = 0;
 int correct_offset = 0;
+int error = 0;
+
+int right = 0;
+int left = 0;
+int front_left = 0;
+int front_right = 0;
 
 void allEmitters(int state);
 
@@ -63,30 +70,34 @@ int main()
     initTimer1();
     initPLL();
     initAD();
-    
-    while( sampleSensor(R90_SENSOR) < 500 );         // Wait for start input
+
+    while( sampleSensor(F1_SENSOR) < 400 );         // Wait for start input
     for(k = 0; k< 150000; k++);                     // Delay 
+    
+    ADC1BUF0 = 0;
 
     LATBbits.LATB14 = 0;                            // Enable Motors
     T1CONbits.TON = 1;                              // Enable Timer
 
+    
     /********************************
      *      Main Body 
      ********************************/ 
     while(1)
     {
-        ADCValue = sampleSensor(L90_SENSOR);
+        error = sampleSensor(R90_SENSOR) - sampleSensor(L90_SENSOR);
         while(lMotor.count < CELL_DISTANCE)
         {
             Motor_enable(&lMotor);
             Motor_enable(&rMotor);
         } 
-        __asm__ volatile ("reset");
+
+        Motor_disable(&lMotor);
+        Motor_disable(&rMotor);
 
         // Software Reset
         if(PORTBbits.RB15 == 1)
             __asm__ volatile ("reset");
-
     }
 
 
@@ -96,18 +107,36 @@ int main()
  *      Interrupt Service Routine 1
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
-        _T1IF = 0;      // Reset the timer flag
         
-        if( lMotor.enable || correct_offset < 25)
-            Motor_step(&lMotor);
+        _T1IF = 0;      // Reset the timer flag
+        if(correct_offset == 15)
+        {
+            if(error > 0)
+            {
+                Motor_step(&lMotor);
+                error--;
+            }
 
-        if( rMotor.enable || correct_offset < 25)
-            Motor_step(&rMotor);
+            else if(error < 0)
+            {
+                Motor_step(&rMotor);
+                error++;
+            }
 
-        if(correct_offset < 25)
-            correct_offset++;
-        else
+            else if(error == 0)
+            {
+                Motor_step(&lMotor);
+                Motor_step(&rMotor);
+            }
             correct_offset = 0;
+        }
+        else
+        {
+            Motor_step(&lMotor);
+            Motor_step(&rMotor);
+        }
+
+        correct_offset++;
 
         __PIN_MotorRStep = rMotor.step;   // Update right motor state
         __PIN_MotorLStep = lMotor.step;   // Update left motor state
