@@ -44,6 +44,8 @@ int left = 0;
 int front_left = 0;
 int front_right = 0;
 
+int correct_interval = 15;
+
 void allEmitters(int state);
 void powerMotors(int state);
 void powerEmitters(int state);
@@ -56,7 +58,6 @@ void initMotors(void);
 int sampleSensor(int sensor);                       // Analog to digital
 void sampleAD(void);
 void delayMicro(unsigned int delay);                // Misc
-
 
 inline void waitForStart(void);
 inline void powerEmitters(int state);
@@ -114,22 +115,19 @@ int main()
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         
         _T1IF = 0;      // Reset the timer flag
-        if(correct_offset == 15)
+        if(correct_offset == correct_interval)
         {
-            if(error > 0)
-            {
+            if(error > 0){
                 Motor_step(&lMotor);
                 error--;
             }
 
-            else if(error < 0)
-            {
+            else if(error < 0){
                 Motor_step(&rMotor);
                 error++;
             }
 
-            else if(error == 0)
-            {
+            else if(error == 0){
                 Motor_step(&lMotor);
                 Motor_step(&rMotor);
             }
