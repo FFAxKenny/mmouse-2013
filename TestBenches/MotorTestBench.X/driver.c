@@ -50,6 +50,11 @@ int sampleSensor(int sensor);                       // Analog to digital
 void sampleAD(void);
 void delayMicro(unsigned int delay);                // Misc
 
+
+inline void waitForStart(void);
+inline void powerEmitters(int state);
+inline void powerMotors(int state);
+
 // Declare the motors
 Motor lMotor;
 Motor rMotor;
@@ -233,7 +238,7 @@ void initPins(void)
 
 
     // Make sure that the emitters are off
-    allEmitters(__OFF);
+    allEmitters(OFF);
     
 }
 void allEmitters(int state)
