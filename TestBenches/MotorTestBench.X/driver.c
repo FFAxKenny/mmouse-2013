@@ -30,7 +30,7 @@
 
 // Configuration Options
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
-_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_NONE);   // Some other stuff
+_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
 long i = 0;
 int correct_offset = 0;
