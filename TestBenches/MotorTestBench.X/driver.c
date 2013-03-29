@@ -17,8 +17,8 @@
 // True False Definitions
 #define TRUE    1
 #define FALSE   0 
-#define __ON    1
-#define __OFF   0
+#define ON    1
+#define OFF   0
 
 // Definitions for Analog to Digital Conversion
 #define L90_SENSOR  0
@@ -69,7 +69,7 @@ int main()
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
 
-    powerMotors(__ON);
+    powerMotors(ON);
     T1CONbits.TON = 1;                              // Enable Timer
 
     /********************************
@@ -88,13 +88,8 @@ int main()
         // Software Reset
         if(PORTBbits.RB15 == 1)
             __asm__ volatile ("reset");
-
     }
-
-
 }
-
-
 
 /*********************************************************************
  *      Interrupt Service Routine 1
