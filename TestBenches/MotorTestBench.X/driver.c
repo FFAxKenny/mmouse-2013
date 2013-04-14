@@ -177,8 +177,8 @@ void moveCell(int n)
             else 
                 error = 0;
 
-            PR1 = 10000 + error*pK;            // Right Motor
-            PR2 = 10000 - error*pK;            // Left Motor
+            PR1 = 8000 + error*pK;            // Right Motor
+            PR2 = 8000 - error*pK;            // Left Motor
         }
     }
 
