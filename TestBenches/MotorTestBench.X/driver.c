@@ -140,146 +140,50 @@ int main()
         int k;
 
 
+        moveCell(1);
         while(1){
-
-            if(left < 35){
-                turn90(0);
-                moveCell(1);
-            }
-            else{
-                if(front < 60){         // Open Front
-                    moveCell(1);
-                }
-                else                    // Closed Front
-                {
-                    if(right < 50){     // Open right
-                        // Turn right
-                        turn90(1);
-                        moveCell(1);
-                    }
-                    else{
-                        // turn around
-                        turn180(1);
-                        moveCell(1);
-                    }
-                }
-            }
-
         }
-        // Software Reset
-        //if(PORTBbits.RB15 == 1)
-            //__asm__ volatile ("reset");
+
     }
 }
-void realign(int n)
-{
-
-    int frontL = sampleSensor(F1_SENSOR);
-    int frontR = sampleSensor(F2_SENSOR);
-    int error = frontL - frontR;
-
-    Motor_disable(&lMotor);
-    Motor_disable(&rMotor);
-
-
-    // Backup if too close
-    if( (frontL + frontR) /2 > 700)
-    {
-        while( sampleSensor(F1_SENSOR) > 700)
-        {
-            lMotor.dir = 0;
-            rMotor.dir = 0;
-        }
-            lMotor.dir = 1;
-            rMotor.dir = 1;
-    }
-
-
-    /*
-    if( error > 0 )         // if the mouse is leaning to the right
-    {
-        while(sampleSensor(F1_SENSOR) > sampleSensor(F2_SENSOR))
-        {
-            lMotor.dir = 0;
-            lMotor.enable = 1;
-            rMotor.enable = 1;
-        }
-
-    }
-    else if(error < 0)      // if mouse is learning to left
-    {
-        while(sampleSensor(F2_SENSOR) > sampleSensor(F1_SENSOR))
-        {
-            rMotor.dir = 0;
-            rMotor.enable = 1;
-            lMotor.enable = 1;
-        }
-
-    }
-    else
-    {
-
-    }
-    */
-
-    rMotor.dir = 1;
-    lMotor.dir = 1;
-}
-
-
-
 
 void moveCell(int n)
 {
     int i; 
     int temp;
     long whoo;
+    int r;
+    int l;
+    int error; 
+    int pK = 1;
+
 
     for(i = 0; i < n ; i++ )
     {
+        // Go off one motor for step counts.. 
         temp = lMotor.count;
         while( (lMotor.count - temp) < CELL_DISTANCE) {
-            
-            // Sample and correct
-            correctCount = lMotor.count;
-            while( (lMotor.count - correctCount) < CORRECT_DISTANCE){
-                if(sampleSensor(F1_SENSOR) > 800)
-                    break;
-                Motor_enable(&lMotor);
-                Motor_enable(&rMotor);
-            } 
-            if(sampleSensor(F1_SENSOR) > 800)
-                break;
-            int r = sampleSensor(R90_SENSOR);
-            int l = sampleSensor(L90_SENSOR);
+            lMotor.enable = 1;
+            rMotor.enable = 1;
 
-            if( (lMotor.count - temp) < (CELL_DISTANCE/2 + 50) )
-            {
-                left = sampleSensor(L90_SENSOR);
-                right = sampleSensor(R90_SENSOR);
-                front = sampleSensor(F1_SENSOR);
-            }
+            r = sampleSensor(R90_Sensor);
+            l = sampleSensor(L90_Sensor);
 
-            if( r > RIGHT_THRESHOLD && l > LEFT_THRESHOLD)
-                error = r - NOMINAL_RIGHT_VALUE;
-            else if( r < RIGHT_THRESHOLD && l > LEFT_THRESHOLD)     // gap on the right
-                error = NOMINAL_LEFT_VALUE - l;                       // track using left
-            else if( r > RIGHT_THRESHOLD && l < LEFT_THRESHOLD)     // gap on the left 
-                error = r - NOMINAL_RIGHT_VALUE;                    // track using right wall
-            else            // Pray
+            // always sample off the right sensor, unless there isn't one
+            if( r > RIGHT_TRESHOLD )
+                error = right - leftOptimalValue;
+            else if( l > LEFT_TRESHOLD )
+                error = rightOptimalValue - left;
+            else 
                 error = 0;
 
+            PR1 = 10000 + error*pK;            // Right Motor
+            PR2 = 10000 - error*pK;            // Left Motor
         }
-
-        Motor_disable(&lMotor);
-        Motor_disable(&rMotor);
-            __delay32(5000000);
-    __delay32(5000000);
-    __delay32(5000000);
-        Motor_enable(&lMotor);
-        Motor_enable(&rMotor);
-
     }
+
+
+            
 }
 
 void turn90(int direction)
@@ -359,6 +263,7 @@ void enableTimer(int n)
                 T1CONbits.TON = 1;                              // Enable Timer
                 break;
         case 2:
+                T2CONbits.TON = 1;                              // Enable Timer
                 break;
         case 3:
                 break;
@@ -377,6 +282,7 @@ void disableTimer(int n)
                 T1CONbits.TON = 0;                              // Enable Timer
                 break;
         case 2:
+                T2CONbits.TON = 0;                              // Enable Timer
                 break;
         case 3:
                 break;
@@ -388,47 +294,26 @@ void disableTimer(int n)
 }
 
 /*********************************************************************
- *      Interrupt Service Routine 1
+ *      Motor Interrupt Service Routines
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
-        
-        // If the motors are enabled, step them
-        if(lMotor.enable && rMotor.enable)
-        {
-            // If it is time to correct the motors
-            if(correct_offset == correct_interval){
-                if(error > 0){
-                    Motor_step(&lMotor);
-                    error--;
-                }
+        if( lMotor.enable)
+            Motor_step(&lMotor);
 
-                else if(error < 0){
-                    Motor_step(&rMotor);
-                    error++;
-                }
-
-                else if(error == 0){
-                    Motor_step(&lMotor);
-                    Motor_step(&rMotor);
-                }
-                correct_offset = 0;
-            }
-            // If it is not time to correct the motors
-            else if (correct_offset < correct_interval){
-                Motor_step(&lMotor);
-                Motor_step(&rMotor);
-                correct_offset++;
-            }
-        }
-        else
-        {
-            // Do nothing
-        }
-
-
-        updateMotorStates();
+        __PIN_MotorLStep = lMotor.step;   // Update left motor state
+        __PIN_MotorLDir = lMotor.dir;
 }
+void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
+        _T1IF = 0;      // Reset the timer flag
+
+        if( rMotor.enable ) 
+            Motor_step(&rMotor);
+        __PIN_MotorRStep = rMotor.step;   // Update right motor state
+        __PIN_MotorRDir = rMotor.dir;
+
+}
+
 
 void updateMotorStates(void)
 {
@@ -630,6 +515,20 @@ void initTimer1(void)
     _T1IE = 1;
     T1CONbits.TON = 0;       // Enable Timer
 
+}
+void initTimer2(void)
+{
+    /********************************
+     *      Timer2 Configuration
+     ********************************/
+    T2CON = 0;               // Reset T1 Configuration
+    T2CONbits.TCKPS = 1;     // Set the ratio to the highest
+    PR2 = 9500;             // Set the timer
+
+    _T2IP = 1;
+    _T2IF = 0;
+    _T2IE = 1;
+    T2CONbits.TON = 0;       // Enable Timer
 }
 
 /*********************************************************************
