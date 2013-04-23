@@ -70,6 +70,7 @@ void moveCell(int n);
 void initAD(void);                                  // Init Functions
 void initPLL(void);
 void initTimer1(void);
+void initTimer2(void);
 void initPins(void);
 void initMotors(void);
 int sampleSensor(int sensor);                       // Analog to digital
@@ -86,6 +87,7 @@ inline void disableTimer(int n);
 inline void waitForStart(void);
 inline void powerEmitters(int state);
 inline void powerMotors(int state);
+int prevError = 0;
 
 void updateMotorStates(void);
 
@@ -95,6 +97,8 @@ int errorOffset = 0;
 
 int nominalRightValue = 0;
 int nominalLeftValue = 0;
+
+void sampleAllSensors();
 
 // Declare the motors
 Motor lMotor;
@@ -109,9 +113,11 @@ int main()
     initMotors();
     initPins();
     initTimer1();
+    initTimer2();
     initPLL();
     initAD();
-    
+
+    LATBbits.LATB13 = 1;                            // Enable Motors
 
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
@@ -124,66 +130,44 @@ int main()
     right = sampleSensor(R90_SENSOR);
     front = sampleSensor(F1_SENSOR);
     powerMotors(ON);
-    enableTimer(1);
 
     
     /********************************
      *      Wall Hugger Algorithm
      ********************************/ 
-    while(1)
-    {
-        // Move forward one cell and track
-        int temp;
-        int j; 
-        int yay; 
-
-        int k;
-
-
+    while(1) {
         moveCell(1);
-        while(1){
-        }
-
     }
+}
+
+void sampleAllSensors(){
+    left = sampleSensor(L90_SENSOR);
+    right = sampleSensor(R90_SENSOR);
+    front = sampleSensor(F1_SENSOR);
 }
 
 void moveCell(int n)
 {
-    int i; 
-    int temp;
-    long whoo;
-    int r;
-    int l;
-    int error; 
-    int pK = 1;
+    double temp;
+    temp = lMotor.count;
+    int error = right - 120;
+    int pK = 2;
+    int pD = 60;
+    error = error;
+    sampleAllSensors();
 
-
-    for(i = 0; i < n ; i++ )
-    {
-        // Go off one motor for step counts.. 
-        temp = lMotor.count;
-        while( (lMotor.count - temp) < CELL_DISTANCE) {
-            lMotor.enable = 1;
-            rMotor.enable = 1;
-
-            r = sampleSensor(R90_Sensor);
-            l = sampleSensor(L90_Sensor);
-
-            // always sample off the right sensor, unless there isn't one
-            if( r > RIGHT_TRESHOLD )
-                error = right - leftOptimalValue;
-            else if( l > LEFT_TRESHOLD )
-                error = rightOptimalValue - left;
-            else 
-                error = 0;
-
-            PR1 = 8000 + error*pK;            // Right Motor
-            PR2 = 8000 - error*pK;            // Left Motor
-        }
+    while( (lMotor.count - temp) < 3) {
+            disableTimer(1);
+            disableTimer(2);
+            _T1IF = 0;
+            _T2IF = 0;
+            PR1 = 10000 - error*pK -  (error-prevError)*pD;  // Left Motor
+            PR2 = 10000 + error*pK + (error-prevError)*pD;  // Right Motor
+            enableTimer(1);
+            enableTimer(2);
+            prevError = error;
     }
 
-
-            
 }
 
 void turn90(int direction)
@@ -298,20 +282,20 @@ void disableTimer(int n)
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
+        if(_T2IF == 1) _T2IF = 0;
         if( lMotor.enable)
             Motor_step(&lMotor);
-
         __PIN_MotorLStep = lMotor.step;   // Update left motor state
         __PIN_MotorLDir = lMotor.dir;
 }
 void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
-        _T1IF = 0;      // Reset the timer flag
+        _T2IF = 0;      // Reset the timer flag
+        if(_T1IF == 1) _T1IF = 0;
 
         if( rMotor.enable ) 
             Motor_step(&rMotor);
         __PIN_MotorRStep = rMotor.step;   // Update right motor state
         __PIN_MotorRDir = rMotor.dir;
-
 }
 
 
@@ -333,7 +317,7 @@ inline void powerEmitters(int state){
 
 }
 inline void powerMotors(int state){
-    LATBbits.LATB14 = 0;                            // Enable Motors
+    LATBbits.LATB13 = 0;                            // Enable Motors
 }
 
 /*********************************************************************
@@ -396,7 +380,7 @@ void sampleAD(void)
 {
     // Actually sample
     AD1CON1bits.ADON = 1;
-    delayMicro(20);
+    delayMicro(10);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
@@ -508,7 +492,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 9500;             // Set the timer
+    PR1 = 9000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
@@ -523,7 +507,7 @@ void initTimer2(void)
      ********************************/
     T2CON = 0;               // Reset T1 Configuration
     T2CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR2 = 9500;             // Set the timer
+    PR2 = 9000;             // Set the timer
 
     _T2IP = 1;
     _T2IF = 0;
