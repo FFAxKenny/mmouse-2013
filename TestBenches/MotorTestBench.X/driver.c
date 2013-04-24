@@ -58,8 +58,10 @@ int left = 0;
 int front = 0;
 int front_left = 0;
 int front_right = 0;
+int speedValue = 8000;
 
 int correct_interval = 5;
+int abs (int n);
 
 void allEmitters(int state);
 void powerMotors(int state);
@@ -121,7 +123,7 @@ int main()
 
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay 
-   
+
     // Clear the Buffer 
     ADC1BUF0 = 0;
     nominalLeftValue = 133;
@@ -136,7 +138,14 @@ int main()
      *      Wall Hugger Algorithm
      ********************************/ 
     while(1) {
-        moveCell(1);
+        sampleAllSensors();
+        if(front < 150)
+            moveCell(1);
+        else
+        {
+            disableTimer(1);
+            disableTimer(2);
+        }
     }
 }
 
@@ -149,27 +158,37 @@ void sampleAllSensors(){
 void moveCell(int n)
 {
     double temp;
-    temp = lMotor.count;
-    int error = right - 120;
-    int pK = 2;
-    int pD = 60;
-    error = error;
     sampleAllSensors();
+    int error = 0;
+    int pK = 10;
+    int pD = 50;
+    int tempError = 0;
 
-    while( (lMotor.count - temp) < 3) {
-            disableTimer(1);
-            disableTimer(2);
-            _T1IF = 0;
-            _T2IF = 0;
-            PR1 = 10000 - error*pK -  (error-prevError)*pD;  // Left Motor
-            PR2 = 10000 + error*pK + (error-prevError)*pD;  // Right Motor
+    error = right - 130;
+
+    if(error < 0)
+        tempError = -error;
+    else
+        tempError = error;
+    if(tempError < 40)
+        error = 0;
+
+    temp = lMotor.count;
+    while( (lMotor.count - temp) < 5) {
+            enableTimer(1);
+            enableTimer(2);
+            PR1 = speedValue - error*pK -  (error-prevError)*pD;  // Left Motor
+            PR2 = speedValue + error*pK + (error-prevError)*pD;  // Right Motor
             enableTimer(1);
             enableTimer(2);
             prevError = error;
     }
 
 }
-
+int abs (int n) {
+        const int ret[2] = { n, -n };
+            return ret [n<0];
+}
 void turn90(int direction)
 {
     int temp;
