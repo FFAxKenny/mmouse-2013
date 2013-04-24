@@ -4,11 +4,6 @@
  * Created on February 9, 2013, 11:10 PM
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <xc.h>
-#include <dsp.h>
-#include <p33Exxxx.h>
 
 // User Created H Files
 #include "motor.h"
@@ -63,8 +58,7 @@ int main()
     while(1) {
         if(front < 150)
             moveCell(1);
-        else
-        {
+        else {
             disableTimer(1);
             disableTimer(2);
         }

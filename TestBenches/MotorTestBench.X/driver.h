@@ -6,6 +6,14 @@
  *
  *
  */
+
+// standard includes
+#include <stdio.h>
+#include <stdlib.h>
+#include <xc.h>
+#include <dsp.h>
+#include <p33Exxxx.h>
+
     /* Variables */
     int error = 0;
     int prevError = 0;
