@@ -50,6 +50,7 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
 
 int error = 0;
+int prevError = 0;
 int right = 0;
 int left = 0;
 int front = 0;
@@ -69,6 +70,7 @@ void initTimer1(void);
 void initTimer2(void);
 void initPins(void);
 void initMotors(void);
+
 int sampleSensor(int sensor);                       // Analog to digital
 void sampleAD(void);
 void delayMicro(unsigned int delay);                // Misc
@@ -76,27 +78,17 @@ void delayMicro(unsigned int delay);                // Misc
 void turn90(int direction);
 void turn180(int direction);
 
-void realign(int n);
-
 inline void enableTimer(int n);
 inline void disableTimer(int n);
 inline void waitForStart(void);
 inline void powerEmitters(int state);
 inline void powerMotors(int state);
-int prevError = 0;
 
 void updateMotorStates(void);
 
-int correctCount = 0;
-
-int errorOffset = 0;
-
-int nominalRightValue = 0;
-int nominalLeftValue = 0;
-
 void sampleAllSensors();
 
-// Declare the motors
+
 Motor lMotor;
 Motor rMotor;
 
@@ -120,8 +112,6 @@ int main()
 
     // Clear the Buffer 
     ADC1BUF0 = 0;
-    nominalLeftValue = 133;
-    nominalRightValue = 125;
     left = sampleSensor(L90_SENSOR);
     right = sampleSensor(R90_SENSOR);
     front = sampleSensor(F1_SENSOR);
