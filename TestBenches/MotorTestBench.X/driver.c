@@ -48,19 +48,13 @@
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
 _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
-int CORRECT_DISTANCE = 10;
-long i = 0;
-int correct_offset = 0;
-int error = 0;
 
+int error = 0;
 int right = 0;
 int left = 0;
 int front = 0;
-int front_left = 0;
-int front_right = 0;
 int speedValue = 6000;
 
-int correct_interval = 5;
 int abs (int n);
 
 void allEmitters(int state);
@@ -467,6 +461,7 @@ void initTimer2(void) {
  *     Initialization Functions 
  *********************************************************************/ 
 void delayMicro(unsigned int delay) {
+    int i;
     for (i = 0; i < delay; i++) {
     __asm__ volatile ("repeat #39");
     __asm__ volatile ("nop");
