@@ -140,7 +140,6 @@ int main()
      *      Wall Hugger Algorithm
      ********************************/ 
     while(1) {
-        sampleAllSensors();
         if(front < 150)
             moveCell(1);
         else
@@ -171,8 +170,8 @@ void sampleAllSensors(){
 
 void moveCell(int n)
 {
-    double temp;
     sampleAllSensors();
+    double temp;
     int error = 0;
     int pK = 10;
     int pD = 100;
@@ -199,110 +198,43 @@ int abs (int n) {
         const int ret[2] = { n, -n };
             return ret [n<0];
 }
-void turn90(int direction)
-{
-    int temp;
-    int yay;
-    int pay;
-    int j;
-    PR1 = 11000;             // Set the timer
-
-    if(direction == RIGHT){
-        lMotor.dir = 0;
-        rMotor.dir = 1;
-    }
-    else if(direction == LEFT){
-        lMotor.dir = 1;
-        rMotor.dir = 0;
-    }
-
-    Motor_disable(&lMotor);
-    Motor_disable(&rMotor);
-
-    __delay32(5000000);
-    __delay32(5000000);
-    __delay32(5000000);
-
-
-    Motor_enable(&lMotor);
-    Motor_enable(&rMotor);
-
-    temp = lMotor.count;
-    while( (lMotor.count - temp ) < DISTANCE_90);
-    lMotor.dir = 1;
-    rMotor.dir = 1;
-
-    Motor_disable(&lMotor);
-    Motor_disable(&rMotor);
-    __delay32(5000000);
-    __delay32(5000000);
-    __delay32(5000000);
-    Motor_enable(&lMotor);
-    Motor_enable(&rMotor);
-
-    int temp9 = lMotor.count;
-    while((lMotor.count - temp9) < 70)
-    {
-        lMotor.dir = 0;
-        rMotor.dir = 0;
-    }
-
-    lMotor.dir = 1;
-    rMotor.dir = 1;
-    
-    Motor_disable(&lMotor);
-    Motor_disable(&rMotor);
-    __delay32(5000000);
-    __delay32(5000000);
-    __delay32(5000000);
-    Motor_enable(&lMotor);
-    Motor_enable(&rMotor);
-
-
-    PR1 = 12000;             // Set the timer
+void turn90(int direction) {
 }
 
-void turn180(int direction)
-{
-    turn90(direction);
-    turn90(direction);
+void turn180(int direction) {
 }
 
-void enableTimer(int n)
-{
-    switch(n)
-    {
+void enableTimer(int n) {
+    switch(n) {
         case 1: 
-                T1CONbits.TON = 1;                              // Enable Timer
-                break;
+            T1CONbits.TON = 1;                              // Enable Timer
+            break;
         case 2:
-                T2CONbits.TON = 1;                              // Enable Timer
-                break;
+            T2CONbits.TON = 1;                              // Enable Timer
+            break;
         case 3:
-                break;
+            break;
         case 4:
-                break;
+            break;
         default:
-                break;
+            break;
     }
 }
 
-void disableTimer(int n)
-{
-    switch(n)
-    {
+void disableTimer(int n) {
+    switch(n) {
         case 1: 
-                T1CONbits.TON = 0;                              // Enable Timer
-                break;
+            T1CONbits.TON = 0;                              // Enable Timer
+            break;
         case 2:
-                T2CONbits.TON = 0;                              // Enable Timer
-                break;
+            T2CONbits.TON = 0;                              // Enable Timer
+            break;
         case 3:
-                break;
+            break;
         case 4:
-                break;
+            break;
         default:
-                break;
+            break;
     }
 }
 
@@ -415,13 +347,11 @@ void sampleAD(void)
 /*********************************************************************
  *     Initialization Functions 
  *********************************************************************/ 
-void initMotors(void)
-{
+void initMotors(void) {
     Motor_init(&lMotor);
     Motor_init(&rMotor);
 }
-void initPins(void)
-{
+void initPins(void) {
     LATBbits.LATB9=1;
     LATBbits.LATB6=1;
     LATBbits.LATB5=1;
@@ -454,8 +384,8 @@ void initPins(void)
     allEmitters(OFF);
     
 }
-void allEmitters(int state)
-{
+
+void allEmitters(int state) {
     LATAbits.LATA2 = state;             // L90
     LATAbits.LATA3 = state;             // FL
     LATBbits.LATB4 = state;             // FR
@@ -464,10 +394,7 @@ void allEmitters(int state)
     LATBbits.LATB10 = state;
 }
 
-
-
-void initAD(void)
-{
+void initAD(void) {
     ANSELAbits.ANSA0 = 1;         // Set pin A0 as analog 
     ANSELBbits.ANSB0 = 1;         // Set pin A0 as analog 
     ANSELBbits.ANSB1 = 1;         // Set pin A0 as analog 
@@ -488,8 +415,7 @@ void initAD(void)
 }
 
 
-void initPLL(void)
-{
+void initPLL(void) {
     /********************************
      *      PLL Configuration
      ********************************/
@@ -506,12 +432,9 @@ void initPLL(void)
     while (OSCCONbits.COSC!= 0b001);
     // Wait for PLL to lock
     while (OSCCONbits.LOCK!= 1);
-
-
 }
 
-void initTimer1(void)
-{
+void initTimer1(void) {
     /********************************
      *      Timer1 Configuration
      ********************************/
@@ -526,8 +449,7 @@ void initTimer1(void)
 
 }
 
-void initTimer2(void)
-{
+void initTimer2(void) {
     /********************************
      *      Timer2 Configuration
      ********************************/
@@ -544,45 +466,10 @@ void initTimer2(void)
 /*********************************************************************
  *     Initialization Functions 
  *********************************************************************/ 
-void delayMicro(unsigned int delay)
-{
-
-    for (i = 0; i < delay; i++)
-    {
+void delayMicro(unsigned int delay) {
+    for (i = 0; i < delay; i++) {
     __asm__ volatile ("repeat #39");
     __asm__ volatile ("nop");
     }
 
 }
-
-
-void acceleration(void)
-{
-    // Goes in the timer code 
-        //if(PR1 > 6000)
-            //PR1 = PR1 - 25;            // Set the timer
-
-        /*
-        else if(PR1 > 2200)
-        {
-            PR1 = PR1 - 5;
-        } 
-        else if(PR1 > 1800)
-        {
-            if( test == 45 )
-            {
-                PR1 = PR1-1;
-                test = 0;
-            }
-            else
-            {
-                test++;
-            }
-        }
-        */
-        
-
-        // The body of the Timer1 Interrupt goes here
-
-}
-
