@@ -13,82 +13,19 @@
 // User Created H Files
 #include "motor.h"
 #include "pinconfig.h"
+#include "driver.h"
+#include "tfdef.h"
+#include "dirdef.h"
+#include "adc.h"
 
-// True False Definitions
-#define TRUE    1
-#define FALSE   0 
-#define ON      1
-#define OFF     0
-
-#define LEFT    0
-#define RIGHT   1
-
-// Definitions for Analog to Digital Conversion
-#define L90_SENSOR  0
-#define R90_SENSOR  1
-#define L45_SENSOR  2
-#define R45_SENSOR  3
-#define F1_SENSOR   4
-#define F2_SENSOR   5
-
-#define SENSOR_OFFSET 
-
-#define CELL_DISTANCE 363
-#define DISTANCE_360 240
-#define DISTANCE_90  116
-
-#define RIGHT_THRESHOLD         30
-#define LEFT_THRESHOLD          30
-#define NOMINAL_RIGHT_VALUE     130
-#define NOMINAL_LEFT_VALUE      141
-
+// I forget what this does..something to do with clock
 #pragma config ICS = PGD2
 
 // Configuration Options
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
 _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
-
-int error = 0;
-int prevError = 0;
-int right = 0;
-int left = 0;
-int front = 0;
-int speedValue = 6000;
-
-int abs (int n);
-
-void allEmitters(int state);
-void powerMotors(int state);
-void powerEmitters(int state);
-
-void moveCell(int n);
-
-void initAD(void);                                  // Init Functions
-void initPLL(void);
-void initTimer1(void);
-void initTimer2(void);
-void initPins(void);
-void initMotors(void);
-
-int sampleSensor(int sensor);                       // Analog to digital
-void sampleAD(void);
-void delayMicro(unsigned int delay);                // Misc
-
-void turn90(int direction);
-void turn180(int direction);
-
-inline void enableTimer(int n);
-inline void disableTimer(int n);
-inline void waitForStart(void);
-inline void powerEmitters(int state);
-inline void powerMotors(int state);
-
-void updateMotorStates(void);
-
-void sampleAllSensors();
-
-
+// Declare the motors
 Motor lMotor;
 Motor rMotor;
 
