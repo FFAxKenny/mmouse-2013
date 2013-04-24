@@ -58,7 +58,7 @@ int left = 0;
 int front = 0;
 int front_left = 0;
 int front_right = 0;
-int speedValue = 8000;
+int speedValue = 6000;
 
 int correct_interval = 5;
 int abs (int n);
@@ -132,6 +132,8 @@ int main()
     right = sampleSensor(R90_SENSOR);
     front = sampleSensor(F1_SENSOR);
     powerMotors(ON);
+    enableTimer(1);
+    enableTimer(2);
 
     
     /********************************
@@ -150,10 +152,22 @@ int main()
 }
 
 void sampleAllSensors(){
-    left = sampleSensor(L90_SENSOR);
-    right = sampleSensor(R90_SENSOR);
-    front = sampleSensor(F1_SENSOR);
+    int tempLeft = 0;;
+    int tempRight = 0;;
+    int tempFront = 0;
+    int sampleNumber = 3;
+    int i; 
+
+    for( i = 0; i < sampleNumber ; i++) {
+        tempLeft = tempLeft + sampleSensor(L90_SENSOR);
+        tempRight = tempRight + sampleSensor(R90_SENSOR);
+        tempFront = tempFront + sampleSensor(F1_SENSOR);
+    }
+    left = tempLeft/sampleNumber;
+    right = tempRight/sampleNumber;
+    front = tempFront/sampleNumber;
 }
+
 
 void moveCell(int n)
 {
@@ -161,7 +175,7 @@ void moveCell(int n)
     sampleAllSensors();
     int error = 0;
     int pK = 10;
-    int pD = 50;
+    int pD = 100;
     int tempError = 0;
 
     error = right - 130;
@@ -175,12 +189,8 @@ void moveCell(int n)
 
     temp = lMotor.count;
     while( (lMotor.count - temp) < 5) {
-            enableTimer(1);
-            enableTimer(2);
             PR1 = speedValue - error*pK -  (error-prevError)*pD;  // Left Motor
             PR2 = speedValue + error*pK + (error-prevError)*pD;  // Right Motor
-            enableTimer(1);
-            enableTimer(2);
             prevError = error;
     }
 
@@ -301,22 +311,18 @@ void disableTimer(int n)
  *********************************************************************/ 
 void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void){
         _T1IF = 0;      // Reset the timer flag
-        if(_T2IF == 1) _T2IF = 0;
-        if( lMotor.enable)
-            Motor_step(&lMotor);
-        __PIN_MotorLStep = lMotor.step;   // Update left motor state
-        __PIN_MotorLDir = lMotor.dir;
-}
-void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
-        _T2IF = 0;      // Reset the timer flag
-        if(_T1IF == 1) _T1IF = 0;
-
         if( rMotor.enable ) 
             Motor_step(&rMotor);
         __PIN_MotorRStep = rMotor.step;   // Update right motor state
         __PIN_MotorRDir = rMotor.dir;
 }
-
+void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
+        _T2IF = 0;      // Reset the timer flag
+        if( lMotor.enable)
+            Motor_step(&lMotor);
+        __PIN_MotorLStep = lMotor.step;   // Update left motor state
+        __PIN_MotorLDir = lMotor.dir;
+}
 
 void updateMotorStates(void)
 {
@@ -399,7 +405,7 @@ void sampleAD(void)
 {
     // Actually sample
     AD1CON1bits.ADON = 1;
-    delayMicro(10);
+    delayMicro(3);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
@@ -511,7 +517,7 @@ void initTimer1(void)
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
     T1CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR1 = 9000;             // Set the timer
+    PR1 = 8000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
@@ -519,6 +525,7 @@ void initTimer1(void)
     T1CONbits.TON = 0;       // Enable Timer
 
 }
+
 void initTimer2(void)
 {
     /********************************
@@ -526,7 +533,7 @@ void initTimer2(void)
      ********************************/
     T2CON = 0;               // Reset T1 Configuration
     T2CONbits.TCKPS = 1;     // Set the ratio to the highest
-    PR2 = 9000;             // Set the timer
+    PR2 = 8000;             // Set the timer
 
     _T2IP = 1;
     _T2IF = 0;
@@ -551,9 +558,6 @@ void delayMicro(unsigned int delay)
 
 void acceleration(void)
 {
-
-
-
     // Goes in the timer code 
         //if(PR1 > 6000)
             //PR1 = PR1 - 25;            // Set the timer
