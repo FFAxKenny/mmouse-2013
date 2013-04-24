@@ -12,6 +12,7 @@
 #include "tfdef.h"
 #include "dirdef.h"
 #include "adc.h"
+#include "config.h"
 
 // I forget what this does..something to do with clock
 #pragma config ICS = PGD2
@@ -24,10 +25,14 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 Motor lMotor;
 Motor rMotor;
 
+double currentCellDist = 0;
+int forward_flag = 0;
+
 int main()
 {
     double k;
     int ADCValue;
+    int nextMove = 0;
 
     initRoutine();
 
@@ -41,20 +46,71 @@ int main()
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
+    nextMove=getMove();
+    int i = 0;
 
-    
-    /********************************
-     *      Wall Hugger Algorithm
-     ********************************/ 
-    while(1) {
-        if(front < 150)
-            moveCell(1);
-        else {
-            disableTimer(1);
-            disableTimer(2);
+    while(1){
+        if(currentCellDist > (CELL_DISTANCE - CELL_DISTANCE/2)) {
+            nextMove=getMove();
         }
+        executeMove(nextMove);
+    }
+
+
+}
+void executeMove(int move)
+{
+    switch(move)
+    {
+        case LEFT:
+            turn90(LEFT);
+            forward_flag = 0;
+            moveCell(1);
+            break;
+        case RIGHT:
+            turn90(RIGHT);
+            forward_flag = 0;
+            moveCell(1);
+            break;
+        case BACKWARD:
+            turn360(1);
+            forward_flag = 0;
+            moveCell(1);
+            break;
+        case FORWARD:
+            moveCell(1);
+            break;
+        default:
+            moveCell(1);
+            break;
     }
 }
+
+
+int getMove(void){
+    sampleAllSensors();
+    if(left < LEFT_THRESHOLD) {
+        return LEFT;
+    }
+    // if left is covered
+    else {
+        // if front is open
+        if(front < FRONT_THRESHOLD) {
+            return FORWARD;
+        }
+        // if front is closed
+        else {
+            // if right is open
+            if(right < RIGHT_THRESHOLD)
+                return RIGHT;
+            // if right is closed
+            else
+                return BACKWARD;
+        }
+
+    }
+}
+    
 
 void sampleAllSensors(){
     int tempLeft = 0;;
@@ -65,8 +121,7 @@ void sampleAllSensors(){
 
     for( i = 0; i < sampleNumber ; i++) {
         tempLeft = tempLeft + sampleSensor(L90_SENSOR);
-        tempRight = tempRight + sampleSensor(R90_SENSOR);
-        tempFront = tempFront + sampleSensor(F1_SENSOR);
+        tempRight = tempRight + sampleSensor(R90_SENSOR); tempFront = tempFront + sampleSensor(F1_SENSOR);
     }
     left = tempLeft/sampleNumber;
     right = tempRight/sampleNumber;
@@ -76,28 +131,70 @@ void sampleAllSensors(){
 
 void moveCell(int n)
 {
-    sampleAllSensors();
     double temp;
+    double temp2;
     int error = 0;
     int pK = 10;
     int pD = 100;
     int tempError = 0;
+    int accel = 12000;
+    forward_flag = 1;
 
-    error = right - 130;
+    temp2 = lMotor.count;
+    currentCellDist = lMotor.count - temp2;
 
-    if(error < 0)
-        tempError = -error;
-    else
-        tempError = error;
-    if(tempError < 40)
-        error = 0;
+    while( currentCellDist < CELL_DISTANCE && front < 250)
+    {
+        if(forward_flag = 1) {
+            accel = speedValue;
+        }
+        else if(currentCellDist < CELL_DISTANCE/2) {
+            // Accelerate
+            if(accel > speedValue) {
+                    accel -= 50;
+            }
+        }
+        else if(currentCellDist >= CELL_DISTANCE/2) {
+            // Decelearate
+            if(accel < 12000) {
+                    accel += 50;
+            }
+        }
 
-    temp = lMotor.count;
-    while( (lMotor.count - temp) < 5) {
-            PR1 = speedValue - error*pK -  (error-prevError)*pD;  // Left Motor
-            PR2 = speedValue + error*pK + (error-prevError)*pD;  // Right Motor
-            prevError = error;
+        currentCellDist = lMotor.count - temp2;
+        temp = lMotor.count;
+        sampleAllSensors();
+
+        if(right > 60)
+            error = right - 100;
+        else if( left > 60)
+            error = 160 - left;
+        else
+            error = 0;
+
+        if(error < 0)
+            tempError = -error;
+        else
+            tempError = error;
+        if(tempError < 15)
+            error = 0;
+        while( (lMotor.count - temp) < 2) {
+                PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
+                PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
+                prevError = error;
+        }
     }
+    accel=10000;
+    /*
+    disableTimer(1);
+    disableTimer(2);
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    enableTimer(1);
+    enableTimer(2);
+    */
+
 
 }
 int abs (int n) {
@@ -105,9 +202,60 @@ int abs (int n) {
             return ret [n<0];
 }
 void turn90(int direction) {
+    disableTimer(1);
+    disableTimer(2);
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    PR1 = 12000;
+    PR2 = 12000;
+    if(direction == RIGHT)
+        rMotor.dir = 0;
+    else if(direction == LEFT)
+        lMotor.dir = 0;
+    long temp = lMotor.count;
+    while( (lMotor.count - temp) < DISTANCE_90)
+    {
+        enableTimer(1);
+        enableTimer(2);
+    }
+    disableTimer(1);
+    disableTimer(2);
+    lMotor.dir = 1;
+    rMotor.dir = 1;
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    sampleAllSensors();
+    enableTimer(1);
+    enableTimer(2);
 }
 
-void turn180(int direction) {
+void turn360(int direction) {
+    disableTimer(1);
+    disableTimer(2);
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+    PR1 = 12000;
+    PR2 = 12000;
+    lMotor.dir = 0;
+    long temp = lMotor.count;
+    while( (lMotor.count - temp) < DISTANCE_360)
+    {
+        enableTimer(1);
+        enableTimer(2);
+    }
+    disableTimer(1);
+    disableTimer(2);
+    lMotor.dir = 1;
+    __delay32(5000000);
+    __delay32(5000000);
+    __delay32(5000000);
+
+    sampleAllSensors();
+    enableTimer(1);
+    enableTimer(2);
 }
 
 void enableTimer(int n) {

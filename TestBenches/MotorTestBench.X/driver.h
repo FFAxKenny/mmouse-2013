@@ -20,7 +20,7 @@
     int right = 0;
     int left = 0;
     int front = 0;
-    int speedValue = 6000;
+    int speedValue = 7000;
 
     /* Init Routines */
     void initAD(void);
@@ -43,7 +43,7 @@
 
     /* Movement Routines */
     void turn90(int direction);
-    void turn180(int direction);
+    void turn360(int direction);
     void moveCell(int n);
     
     /* Power Functions */
@@ -60,4 +60,6 @@
     void updateMotorStates(void);
 
     /* Misc */
+    void executeMove(int move);
+    int getMove(void);
     int abs (int n);
