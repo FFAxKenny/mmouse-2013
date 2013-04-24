@@ -29,24 +29,15 @@ int main()
     double k;
     int ADCValue;
 
-    // Init stuff
-    initMotors();
-    initPins();
-    initTimer1();
-    initTimer2();
-    initPLL();
-    initAD();
+    initRoutine();
 
-    LATBbits.LATB13 = 1;                            // Enable Motors
-
+    LATBbits.LATB13 = 1;                            // Disable Motors
     waitForStart();                                 // Wait for the start input
-    for(k = 0; k< 150000; k++);                     // Delay 
+    for(k = 0; k< 150000; k++);                     // Delay the start
 
-    // Clear the Buffer 
-    ADC1BUF0 = 0;
-    left = sampleSensor(L90_SENSOR);
-    right = sampleSensor(R90_SENSOR);
-    front = sampleSensor(F1_SENSOR);
+    ADC1BUF0 = 0;                                   // Clear the buffer
+    sampleAllSensors();
+
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
@@ -389,3 +380,14 @@ void delayMicro(unsigned int delay) {
     }
 
 }
+void initRoutine(void)
+{
+    // Init stuff
+    initMotors();
+    initPins();
+    initTimer1();
+    initTimer2();
+    initPLL();
+    initAD();
+}
+

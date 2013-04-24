@@ -29,6 +29,7 @@
     void initTimer2(void);
     void initPins(void);
     void initMotors(void);
+    void initRoutine(void);
     
     /* Analog to digital */
     void sampleAD(void);
