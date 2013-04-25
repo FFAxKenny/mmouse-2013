@@ -7,8 +7,8 @@
 #define DISTANCE_360 (127*2)
 #define DISTANCE_90  129
 
-#define RIGHT_THRESHOLD         45
-#define LEFT_THRESHOLD          50
+#define RIGHT_THRESHOLD         35
+#define LEFT_THRESHOLD          35
 #define FRONT_THRESHOLD         40
 #define NOMINAL_RIGHT_VALUE     130
 #define NOMINAL_LEFT_VALUE      141

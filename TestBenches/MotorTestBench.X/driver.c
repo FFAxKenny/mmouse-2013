@@ -27,12 +27,12 @@ Motor rMotor;
 
 double currentCellDist = 0;
 int forward_flag = 0;
+int nextMove = 0;
 
 int main()
 {
     double k;
     int ADCValue;
-    int nextMove = 0;
 
     initRoutine();
 
@@ -134,8 +134,8 @@ void moveCell(int n)
     double temp;
     double temp2;
     int error = 0;
-    int pK = 10;
-    int pD = 100;
+    int pK = 20;
+    int pD = 65;
     int tempError = 0;
     int accel = 12000;
     forward_flag = 1;
@@ -143,47 +143,58 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 250)
+    while( currentCellDist < CELL_DISTANCE)
     {
-        if(forward_flag = 1) {
-            accel = speedValue;
-        }
-        else if(currentCellDist < CELL_DISTANCE/2) {
-            // Accelerate
-            if(accel > speedValue) {
-                    accel -= 50;
+        if(front < 250)
+        {
+            if(forward_flag = 1) {
+                accel = speedValue;
+            }
+            else if(currentCellDist < CELL_DISTANCE/2) {
+                // Accelerate
+                if(accel > speedValue) {
+                        accel -= 50;
+                }
+            }
+            else if(currentCellDist >= CELL_DISTANCE/2) {
+                // Decelearate
+                if(accel < 12000) {
+                        accel += 50;
+                }
+            }
+
+            currentCellDist = lMotor.count - temp2;
+            temp = lMotor.count;
+            sampleAllSensors();
+
+            if(right > 30)
+                error = right - 75;
+            else if( left > 30)
+                error = 75 - left;
+            else
+                error = 0;
+
+            if(error < 0)
+                tempError = -error;
+            else
+                tempError = error;
+            if(tempError < 5)
+                error = 0;
+
+            while( (lMotor.count - temp) < 2) {
+                    PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
+                    PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
+                    prevError = error;
             }
         }
-        else if(currentCellDist >= CELL_DISTANCE/2) {
-            // Decelearate
-            if(accel < 12000) {
-                    accel += 50;
-            }
+        else
+        {
+            break;
+            nextMove= getMove();
         }
 
-        currentCellDist = lMotor.count - temp2;
-        temp = lMotor.count;
-        sampleAllSensors();
-
-        if(right > 60)
-            error = right - 100;
-        else if( left > 60)
-            error = 160 - left;
-        else
-            error = 0;
-
-        if(error < 0)
-            tempError = -error;
-        else
-            tempError = error;
-        if(tempError < 15)
-            error = 0;
-        while( (lMotor.count - temp) < 2) {
-                PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
-                PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
-                prevError = error;
-        }
     }
+
     accel=10000;
     /*
     disableTimer(1);
