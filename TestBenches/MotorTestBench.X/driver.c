@@ -134,7 +134,7 @@ void moveCell(int n)
     double temp;
     double temp2;
     int error = 0;
-    int pK = 20;
+    int pK = 22;
     int pD = 65;
     int tempError = 0;
     int accel = 12000;
@@ -145,7 +145,7 @@ void moveCell(int n)
 
     while( currentCellDist < CELL_DISTANCE)
     {
-        if(front < 250)
+        if(front < 220)
         {
             if(forward_flag = 1) {
                 accel = speedValue;
@@ -168,9 +168,9 @@ void moveCell(int n)
             sampleAllSensors();
 
             if(right > 30)
-                error = right - 75;
-            else if( left > 30)
-                error = 75 - left;
+                error = right - 65;
+            else if( left > 20)
+                error = 65 - left;
             else
                 error = 0;
 
