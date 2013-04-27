@@ -25,18 +25,13 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 Motor lMotor;
 Motor rMotor;
 
-void mouseDelay(void);
-void alignToFront(void);
-
 double currentCellDist = 0;
-int forward_flag = 0;
-int nextMove = 0;
-int sample_flag = 0;
 
 int main()
 {
     double k;
     int ADCValue;
+    int nextMove = 0;
 
     initRoutine();
 
@@ -50,10 +45,11 @@ int main()
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
-    nextMove=getMove();
-    int i = 0;
 
     while(1){
+        if(currentCellDist == CELL_DISTANCE/3)
+            nextMove=getMove();
+
         executeMove(nextMove);
     }
 
@@ -64,22 +60,19 @@ void executeMove(int move)
     switch(move)
     {
         case LEFT:
-            forward_flag = 0;
             turn90(LEFT);
             moveCell(1);
             break;
         case RIGHT:
-            forward_flag = 0;
             turn90(RIGHT);
             moveCell(1);
             break;
         case BACKWARD:
-            forward_flag = 0;
+            disableTimer(1);
+            disableTimer(2);
             turn360(1);
-            moveCell(1);
             break;
         case FORWARD:
-            forward_flag = 1;
             moveCell(1);
             break;
         default:
@@ -94,36 +87,29 @@ int getMove(void){
     if(left < LEFT_THRESHOLD) {
         return LEFT;
     }
-    // if left is covered
-    else {
-        // if front is open
-        if(front < FRONT_THRESHOLD) {
-            return FORWARD;
-        }
-        // if front is closed
-        else {
-            // if right is open
-            if(right < RIGHT_THRESHOLD)
-                return RIGHT;
-            // if right is closed
-            else
-                return BACKWARD;
-        }
 
+    else if(front < 130) {
+        return FORWARD;
+    }
+    else if(front >= 130) {
+        return BACKWARD;
+    }
+    else {
+        return RIGHT;
     }
 }
     
 
 void sampleAllSensors(){
-    int tempLeft = 0;
-    int tempRight = 0;
+    int tempLeft = 0;;
+    int tempRight = 0;;
     int tempFront = 0;
     int sampleNumber = 3;
     int i; 
 
     for( i = 0; i < sampleNumber ; i++) {
         tempLeft = tempLeft + sampleSensor(L90_SENSOR);
-        tempRight = tempRight + sampleSensor(R90_SENSOR); 
+        tempRight = tempRight + sampleSensor(R90_SENSOR);
         tempFront = tempFront + sampleSensor(F1_SENSOR);
     }
     left = tempLeft/sampleNumber;
@@ -131,122 +117,39 @@ void sampleAllSensors(){
     front = tempFront/sampleNumber;
 }
 
-void mouseDelay(void) {
-    __delay32(5000000);
-    __delay32(5000000);
-    __delay32(5000000);
-}
-
-
-void alignToFront(void)
-{
-    disableTimer(1);
-    disableTimer(2);
-    sampleAllSensors();
-
-    if(front >= 225) {
-        while(front >= 225){
-            lMotor.dir = 0;
-            rMotor.dir = 0;
-            enableTimer(1);
-            enableTimer(2);
-        }
-    }
-    else {
-        while(front < 225){
-            enableTimer(1);
-            enableTimer(2);
-        }
-    }
-    disableTimer(1);
-    disableTimer(2);
-}
-
-
-
 
 void moveCell(int n)
 {
     double temp;
-    double temp2;
     int error = 0;
+    int pK = 10;
+    int pD = 100;
     int tempError = 0;
-    int accel = 30000;
-    forward_flag = 1;
 
-    temp2 = lMotor.count;
-    currentCellDist = lMotor.count - temp2;
-
-    while( currentCellDist < CELL_DISTANCE && front < 200)
+    currentCellDist = lMotor.count;
+    while( (lMotor.count - currentCellDist) < CELL_DISTANCE )
     {
+        temp = lMotor.count;
+        sampleAllSensors();
+        if(right > RIGHT_THRESHOLD)
+            error = right - 115;
+        else if( left > LEFT_THRESHOLD)
+            error = left - 115;
+        else
+            error = 0;
 
-            if(forward_flag == 1) {
-                accel = speedValue;
-            }
-            else if(currentCellDist < CELL_DISTANCE/2) {
-                // Accelerate
-                if(accel > speedValue) {
-                        accel -= 20;
-                }
-            }
-            else if(currentCellDist >= CELL_DISTANCE/2) {
-                // Decelearate
-                if(accel < speedValue) {
-                        accel += 20;
-                }
-            }
-
-            currentCellDist = lMotor.count - temp2;
-            temp = lMotor.count;
-            sampleAllSensors();
-
-            if(currentCellDist > (CELL_DISTANCE - CELL_DISTANCE/2) &&
-                    sample_flag == FALSE) {
-                nextMove=getMove();
-                sample_flag = TRUE;
-            }
-
-            if(right > 30)
-                error = right - 65;
-            else if( left > 20)
-                error = 65 - left;
-            else
-                error = 0;
-
-            if(error < 0)
-                tempError = -error;
-            else
-                tempError = error;
-            if(tempError < 8)
-                error = 0;
-
-            while( (lMotor.count - temp) < 2) {
-                    PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
-                    PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
-                    prevError = error;
-            }
-
+        if(error < 0)
+            tempError = -error;
+        else
+            tempError = error;
+        if(tempError < 30)
+            error = 0;
+        while( (lMotor.count - temp) < 2) {
+                PR1 = speedValue - error*pK -  (error-prevError)*pD;  // Left Motor
+                PR2 = speedValue + error*pK + (error-prevError)*pD;  // Right Motor
+                prevError = error;
+        }
     }
-
-    /*
-     *  Delay afterwards to check after each cell
-     *
-        disableTimer(1);
-        disableTimer(2);
-        __delay32(5000000);
-        __delay32(5000000);
-        __delay32(5000000);
-        enableTimer(1);
-        enableTimer(2);
-    */
-
-    nextMove = getMove();
-    temp = 0;
-    temp2 = 0;
-    lMotor.count = 0;
-    rMotor.count = 0;
-    sample_flag = 0;
-    currentCellDist = 0;
 
 }
 int abs (int n) {
@@ -259,8 +162,8 @@ void turn90(int direction) {
     __delay32(5000000);
     __delay32(5000000);
     __delay32(5000000);
-    PR1 = 30000;
-    PR2 = 30000;
+    PR1 = 12000;
+    PR2 = 12000;
     if(direction == RIGHT)
         rMotor.dir = 0;
     else if(direction == LEFT)
@@ -275,8 +178,6 @@ void turn90(int direction) {
     disableTimer(2);
     lMotor.dir = 1;
     rMotor.dir = 1;
-    PR1= 16000;
-    PR2= 16000;
     __delay32(5000000);
     __delay32(5000000);
     __delay32(5000000);
@@ -291,8 +192,8 @@ void turn360(int direction) {
     __delay32(5000000);
     __delay32(5000000);
     __delay32(5000000);
-    PR1 = 30000;
-    PR2 = 30000;
+    PR1 = 12000;
+    PR2 = 12000;
     lMotor.dir = 0;
     long temp = lMotor.count;
     while( (lMotor.count - temp) < DISTANCE_360)
@@ -306,8 +207,7 @@ void turn360(int direction) {
     __delay32(5000000);
     __delay32(5000000);
     __delay32(5000000);
-    PR1= 16000;
-    PR2= 16000;
+
     sampleAllSensors();
     enableTimer(1);
     enableTimer(2);
@@ -548,8 +448,8 @@ void initTimer1(void) {
      *      Timer1 Configuration
      ********************************/
     T1CON = 0;               // Reset T1 Configuration
-    T1CONbits.TCKPS = 0;     // Set the ratio to the highest
-    PR1 = 16000;             // Set the timer
+    T1CONbits.TCKPS = 1;     // Set the ratio to the highest
+    PR1 = 8000;             // Set the timer
 
     _T1IP = 1;
     _T1IF = 0;
@@ -563,8 +463,8 @@ void initTimer2(void) {
      *      Timer2 Configuration
      ********************************/
     T2CON = 0;               // Reset T1 Configuration
-    T2CONbits.TCKPS = 0;     // Set the ratio to the highest
-    PR2 = 16000;             // Set the timer
+    T2CONbits.TCKPS = 1;     // Set the ratio to the highest
+    PR2 = 8000;             // Set the timer
 
     _T2IP = 1;
     _T2IF = 0;

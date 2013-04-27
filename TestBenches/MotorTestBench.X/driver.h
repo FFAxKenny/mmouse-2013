@@ -20,7 +20,7 @@
     int right = 0;
     int left = 0;
     int front = 0;
-    int speedValue = 8000;
+    int speedValue = 16000;
 
     /* Init Routines */
     void initAD(void);
