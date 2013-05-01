@@ -1,3 +1,5 @@
+#ifndef MOTOR_H
+#define MOTOR_H
 typedef struct motor{
     int step;
     int enable;
@@ -11,3 +13,4 @@ void Motor_disable(Motor *m);
 void Motor_init(Motor *m);
 void Motor_reverseDir(Motor *m);
 void Motor_changeDir(Motor *m);
+#endif

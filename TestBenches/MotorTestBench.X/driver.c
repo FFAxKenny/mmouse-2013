@@ -4,15 +4,8 @@
  * Created on February 9, 2013, 11:10 PM
  */
 
-
 // User Created H Files
-#include "motor.h"
-#include "pinconfig.h"
 #include "driver.h"
-#include "tfdef.h"
-#include "dirdef.h"
-#include "adc.h"
-#include "config.h"
 
 // I forget what this does..something to do with clock
 #pragma config ICS = PGD2
@@ -21,87 +14,33 @@
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
 _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 
+//void funMazeInit();
 // Declare the motors
 Motor lMotor;
 Motor rMotor;
 
-void mouseDelay(void);
-void alignToFront(void);
+Cell mouseMaze[16][16];
+StackA nextLevel;
+StackA currentLevel;
 
 double currentCellDist = 0;
 int forward_flag = 0;
 int nextMove = 0;
 int sample_flag = 0;
 
-typedef struct position{
-    int x;
-    int y;
-    int dir;
-} Position;
-
 Position mousePos;
-
-void Position_forwardCell(Position *mousePos) {
-    switch(mousePos->dir){
-        case NORTH:
-            mousePos->y++;
-            break;
-        case EAST:
-            mousePos->x++;
-            break;
-        case WEST:
-            mousePos->x--;
-            break;
-        case SOUTH:
-            mousePos->y--;
-            break;
-        default:
-            break;
-    }
-
-}
-void Position_updateDirection(Position *mousePos, int turn) {
-    switch(turn){
-        case RIGHT:
-            if(mousePos->dir == NORTH) mousePos->dir = EAST;
-            else if(mousePos->dir == EAST) mousePos->dir = SOUTH;
-            else if(mousePos->dir == WEST) mousePos->dir = NORTH;
-            else if(mousePos->dir == SOUTH) mousePos->dir = WEST;
-            break;
-        case LEFT:
-            if(mousePos->dir == NORTH) mousePos->dir = WEST;
-            else if(mousePos->dir == EAST) mousePos->dir = NORTH;
-            else if(mousePos->dir == WEST) mousePos->dir = SOUTH;
-            else if(mousePos->dir == SOUTH) mousePos->dir = EAST;
-            break;
-        case BACKWARD:
-            if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
-            else if(mousePos->dir == WEST) mousePos->dir = EAST;
-            else if(mousePos->dir == EAST) mousePos->dir = WEST;
-            else mousePos->dir == NORTH;
-            break;
-        default:    
-            break;
-    }
-
-}
-
-int isCenter(Position *p) {
-    if(p->x==8 && p->y==7) return TRUE;
-    else if(p->x==7 && p->y==8) return TRUE;
-    else if(p->x==8 && p->y==8) return TRUE;
-    else if(p->x==7 && p->y==7) return TRUE;
-    else return FALSE;
-}
 
 int main(void) {
     double k;
+    
+    initRoutine();
 
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
 
-    initRoutine();
+    FloodFill_initMaze();
+    //funMazeInit();
 
     LATBbits.LATB13 = 1;                            // Disable Motors
     waitForStart();                                 // Wait for the start input
@@ -202,34 +141,6 @@ void mouseDelay(void) {
     __delay32(5000000);
     __delay32(5000000);
 }
-
-
-void alignToFront(void)
-{
-    disableTimer(1);
-    disableTimer(2);
-    sampleAllSensors();
-
-    if(front >= 225) {
-        while(front >= 225){
-            lMotor.dir = 0;
-            rMotor.dir = 0;
-            enableTimer(1);
-            enableTimer(2);
-        }
-    }
-    else {
-        while(front < 225){
-            enableTimer(1);
-            enableTimer(2);
-        }
-    }
-    disableTimer(1);
-    disableTimer(2);
-}
-
-
-
 
 void moveCell(int n)
 {
@@ -665,5 +576,112 @@ void initRoutine(void)
     initTimer2();
     initPLL();
     initAD();
+}
+
+void Position_forwardCell(Position *mousePos) {
+    switch(mousePos->dir){
+        case NORTH:
+            mousePos->y++;
+            break;
+        case EAST:
+            mousePos->x++;
+            break;
+        case WEST:
+            mousePos->x--;
+            break;
+        case SOUTH:
+            mousePos->y--;
+            break;
+        default:
+            break;
+    }
+
+}
+void Position_updateDirection(Position *mousePos, int turn) {
+    switch(turn){
+        case RIGHT:
+            if(mousePos->dir == NORTH) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = NORTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = WEST;
+            break;
+        case LEFT:
+            if(mousePos->dir == NORTH) mousePos->dir = WEST;
+            else if(mousePos->dir == EAST) mousePos->dir = NORTH;
+            else if(mousePos->dir == WEST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = EAST;
+            break;
+        case BACKWARD:
+            if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = WEST;
+            else mousePos->dir = NORTH;
+            break;
+        default:    
+            break;
+    }
+
+}
+
+int isCenter(Position *p) {
+    if(p->x==8 && p->y==7) return TRUE;
+    else if(p->x==7 && p->y==8) return TRUE;
+    else if(p->x==8 && p->y==8) return TRUE;
+    else if(p->x==7 && p->y==7) return TRUE;
+    else return FALSE;
+}
+
+
+void funMazeInit(){
+    int i = 0;
+    int j = 0;
+    int level = 0;
+    Cell* tempCell;
+
+    StackInit(&currentLevel);
+    StackInit(&nextLevel);
+
+    // init the maze values
+    for(i = 15; i >= 0 ; i--) {
+        for(j = 0; j < 16; j++) {
+            mouseMaze[i][j].floodValue = 255;
+            mouseMaze[i][j].x = j;
+            mouseMaze[i][j].y = i;
+        }
+    }
+
+    // Map the initial walls
+    for( i = 0; i < 16 ; i++)
+        mouseMaze[i][0].west = TRUE;
+    for( i = 0; i < 16 ; i++)
+        mouseMaze[i][15].east = TRUE;
+    for( i = 0; i < 16 ; i++)
+        mouseMaze[0][i].south = TRUE;
+    for( i = 0; i < 16 ; i++)
+        mouseMaze[15][i].north = TRUE;
+
+    tempCell = &mouseMaze[7][7];
+    StackPush(&currentLevel, &mouseMaze[7][7]);
+
+    while(1){
+        while(!StackIsEmpty(&currentLevel)) {
+            tempCell=StackPop(&currentLevel);
+            //printf("Popping %d,%d \n", tempCell->x, tempCell->y);
+            if(tempCell->floodValue == 255) {
+                tempCell->floodValue = level;
+                FloodFill_pushNeighbors(tempCell);
+            }
+        }
+        if(!StackIsEmpty(&nextLevel)) {
+            level++;
+            //printf("Level %d\n", level);
+            StackCopy(&nextLevel, &currentLevel);   // Copy nextLevel into Current lev
+            //StackDestroy(&nextLevel);
+            StackInit(&nextLevel);
+        }
+        else {
+            break;  // if empty, done
+        }
+    }
 }
 

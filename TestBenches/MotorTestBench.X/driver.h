@@ -14,6 +14,24 @@
 #include <dsp.h>
 #include <p33Exxxx.h>
 
+#include "FloodFill.h"
+#include "motor.h"
+#include "pinconfig.h"
+#include "tfdef.h"
+#include "dirdef.h"
+#include "adc.h"
+#include "config.h"
+#include "Cell.h"
+#include "stackA.h"
+#include "stack.h"
+
+
+    typedef struct position{
+        int x;
+        int y;
+        int dir;
+    } Position;
+
     /* Variables */
     int error = 0;
     int prevError = 0;
@@ -21,6 +39,7 @@
     int left = 0;
     int front = 0;
     int speedValue = 16000;
+
 
     /* Init Routines */
     void initAD(void);
@@ -62,4 +81,12 @@
     /* Misc */
     void executeMove(int move);
     int getMove(void);
-    int abs (int n);
+    int abs(int n);
+    void mouseDelay(void);
+
+    /* Position Tracking */
+    extern void Position_forwardCell(Position *mousePos);
+    extern void Position_updateDirection(Position *mousePos, int turn);
+    extern void Position_updateDirection(Position *mousePos, int turn);
+    extern int isCenter(Position *p);
+
