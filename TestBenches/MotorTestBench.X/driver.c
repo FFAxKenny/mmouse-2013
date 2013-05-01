@@ -33,10 +33,73 @@ int forward_flag = 0;
 int nextMove = 0;
 int sample_flag = 0;
 
-int main()
-{
+typedef struct position{
+    int x;
+    int y;
+    int dir;
+} Position;
+
+Position mousePos;
+
+void Position_forwardCell(Position *mousePos) {
+    switch(mousePos->dir){
+        case NORTH:
+            mousePos->y++;
+            break;
+        case EAST:
+            mousePos->x++;
+            break;
+        case WEST:
+            mousePos->x--;
+            break;
+        case SOUTH:
+            mousePos->y--;
+            break;
+        default:
+            break;
+    }
+
+}
+void Position_updateDirection(Position *mousePos, int turn) {
+    switch(turn){
+        case RIGHT:
+            if(mousePos->dir == NORTH) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = NORTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = WEST;
+            break;
+        case LEFT:
+            if(mousePos->dir == NORTH) mousePos->dir = WEST;
+            else if(mousePos->dir == EAST) mousePos->dir = NORTH;
+            else if(mousePos->dir == WEST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = EAST;
+            break;
+        case BACKWARD:
+            if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = WEST;
+            else mousePos->dir == NORTH;
+            break;
+        default:    
+            break;
+    }
+
+}
+
+int isCenter(Position *p) {
+    if(p->x==8 && p->y==7) return TRUE;
+    else if(p->x==7 && p->y==8) return TRUE;
+    else if(p->x==8 && p->y==8) return TRUE;
+    else if(p->x==7 && p->y==7) return TRUE;
+    else return FALSE;
+}
+
+int main(void) {
     double k;
-    int ADCValue;
+
+    mousePos.x = 0;
+    mousePos.y = 0;
+    mousePos.dir = NORTH;
 
     initRoutine();
 
@@ -44,18 +107,21 @@ int main()
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
-    ADC1BUF0 = 0;                                   // Clear the buffer
-    sampleAllSensors();
+    ADC1BUF0 = 0;                                   // Clear the buffer sampleAllSensors();
 
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
     nextMove=getMove();
-    int i = 0;
 
-    while(1){
+    while(!isCenter(&mousePos)){
         executeMove(nextMove);
     }
+    while(1){
+        disableTimer(1);
+        disableTimer(2);
+    }
+
 
 
 }
@@ -200,14 +266,14 @@ void moveCell(int n)
             temp = lMotor.count;
             sampleAllSensors();
 
-            if(currentCellDist > (CELL_DISTANCE - CELL_DISTANCE/2) &&
+            if(currentCellDist > (1000 ) &&
                     sample_flag == FALSE) {
                 nextMove=getMove();
                 sample_flag = TRUE;
             }
 
             if(right > 30)
-                error = right - 65;
+                error = right - 55;
             else if( left > 20)
                 error = 65 - left;
             else
@@ -240,6 +306,8 @@ void moveCell(int n)
         enableTimer(2);
     */
 
+    Position_forwardCell(&mousePos);
+
     nextMove = getMove();
     temp = 0;
     temp2 = 0;
@@ -261,10 +329,14 @@ void turn90(int direction) {
     __delay32(5000000);
     PR1 = 30000;
     PR2 = 30000;
-    if(direction == RIGHT)
+    if(direction == RIGHT){
+        Position_updateDirection(&mousePos, RIGHT);
         rMotor.dir = 0;
-    else if(direction == LEFT)
+    }
+    else if(direction == LEFT){
+        Position_updateDirection(&mousePos, LEFT);
         lMotor.dir = 0;
+    }
     long temp = lMotor.count;
     while( (lMotor.count - temp) < DISTANCE_90)
     {
@@ -300,6 +372,7 @@ void turn360(int direction) {
         enableTimer(1);
         enableTimer(2);
     }
+    Position_updateDirection(&mousePos, BACKWARD);
     disableTimer(1);
     disableTimer(2);
     lMotor.dir = 1;
@@ -377,7 +450,7 @@ void updateMotorStates(void)
  *      Routine Functions
  *********************************************************************/ 
 inline void waitForStart(void){
-    while( sampleSensor(R90_SENSOR) < 400 );         // Wait for start input
+    while( sampleSensor(R90_SENSOR) < 300 );         // Wait for start input
 }
 inline void powerEmitters(int state){
 
