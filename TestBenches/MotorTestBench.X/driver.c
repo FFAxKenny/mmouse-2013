@@ -186,11 +186,11 @@ int localToGlobalDir(int localDir, int currDir){
  */
 int getMoveFlood(void){
     sampleAllSensors();
-    if(left < LEFT_THRESHOLD)
+    if(left > LEFT_THRESHOLD)
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
-    if(right < RIGHT_THRESHOLD)
+    if(right > RIGHT_THRESHOLD)
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
-    if(front < FRONT_THRESHOLD)
+    if(front > FRONT_THRESHOLD)
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
 
     FloodFill_floodMaze(); 
