@@ -6,6 +6,7 @@
 
 // User Created H Files
 #include "driver.h"
+#include "dirdef.h"
 
 // I forget what this does..something to do with clock
 #pragma config ICS = PGD2
@@ -29,6 +30,9 @@ int nextMove = 0;
 int sample_flag = 0;
 
 Position mousePos;
+int localToGlobalDir(int localDir, int currDir);
+int globalToLocalDir(int globalDir, int currDir);
+int getMoveFlood(void);
 
 int main(void) {
     double k;
@@ -51,9 +55,16 @@ int main(void) {
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
-    nextMove=getMove();
+    Maze_putWall(mouseMaze, mousePos.y, mousePos.x, NORTH);
+    Maze_putWall(mouseMaze, 0 , 1 , NORTH);
+    Maze_putWall(mouseMaze, 0 , 2 , NORTH);
+    Maze_putWall(mouseMaze, 0 , 3 , NORTH);
+    nextMove = globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[0][0]), mousePos.dir);
+    /*
+    nextMove=getMoveFlood();
+    */
 
-    while(!isCenter(&mousePos)){
+    while(!isCenter(&mousePos) && mouseMaze[1][0].south == 1){
         executeMove(nextMove);
     }
     while(1){
@@ -64,6 +75,11 @@ int main(void) {
 
 
 }
+/* 
+ *
+ * Given a move, executes a move. This function is the main driving function behind the mouse
+ *
+ */
 void executeMove(int move)
 {
     switch(move)
@@ -93,6 +109,100 @@ void executeMove(int move)
     }
 }
 
+/*
+ *
+ * Converts a global maze direction to a local maze direction.
+ * This function is used primarily to help maze tracking
+ *
+ */
+
+int globalToLocalDir(int globalDir, int currDir){
+    switch(currDir)
+    {
+        case NORTH:
+            return globalDir;
+            break;
+        case EAST:
+            if(globalDir == NORTH) return LEFT;
+            else if(globalDir == EAST) return FORWARD;
+            else if(globalDir == SOUTH) return RIGHT;
+            else if(globalDir == WEST) return BACKWARD;
+            break;
+        case SOUTH:
+            if(globalDir == NORTH) return BACKWARD;
+            else if(globalDir == EAST) return LEFT;
+            else if(globalDir == SOUTH) return FORWARD;
+            else if(globalDir == WEST) return RIGHT;
+            break;
+        case WEST:
+            if(globalDir == NORTH) return RIGHT;
+            else if(globalDir == EAST) return BACKWARD;
+            else if(globalDir == SOUTH) return LEFT;
+            else if(globalDir == WEST) return FORWARD;
+            break;
+        default:
+            return NORTH;
+    }
+}
+
+/*
+ *
+ * Converts a local maze direction to a global maze direction.
+ * This function is used primarily to help maze tracking
+ *
+ */
+int localToGlobalDir(int localDir, int currDir){
+    switch(currDir)
+    {
+        case NORTH:
+            if(localDir == LEFT) return WEST;
+            else if(localDir == FRONT) return NORTH;
+            else if(localDir == RIGHT) return EAST;
+            else return NORTH;
+        case EAST:
+            if(localDir == LEFT) return NORTH;
+            else if(localDir == FRONT) return EAST;
+            else if(localDir == RIGHT) return SOUTH;
+            else return NORTH;
+        case SOUTH:
+            if(localDir == LEFT) return EAST;
+            else if(localDir == FRONT) return SOUTH;
+            else if(localDir == RIGHT) return WEST;
+            else return NORTH;
+        case WEST:
+            if(localDir == LEFT) return SOUTH;
+            else if(localDir == FRONT) return WEST;
+            else if(localDir == RIGHT) return NORTH;
+            else return NORTH;
+        default: 
+            return NORTH;
+    }
+}
+
+/*
+ *
+ * Calculates a move using floodFill
+ * 
+ */
+int getMoveFlood(void){
+    sampleAllSensors();
+    if(left < LEFT_THRESHOLD)
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
+    if(right < RIGHT_THRESHOLD)
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
+    if(front < FRONT_THRESHOLD)
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
+
+    FloodFill_floodMaze(); 
+    return Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]);
+
+}
+
+/*
+ *
+ * Calculates a move using wall hugging.
+ *
+ */
 
 int getMove(void){
     sampleAllSensors();
@@ -154,8 +264,7 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 200)
-    {
+    while( currentCellDist < CELL_DISTANCE ) {
 
             if(forward_flag == 1) {
                 accel = speedValue;
@@ -179,7 +288,11 @@ void moveCell(int n)
 
             if(currentCellDist > (1000 ) &&
                     sample_flag == FALSE) {
-                nextMove=getMove();
+                disableTimer(1);
+                disableTimer(2);
+                //nextMove=getMoveFlood();
+                enableTimer(1);
+                enableTimer(2);
                 sample_flag = TRUE;
             }
 
@@ -206,25 +319,30 @@ void moveCell(int n)
     }
 
     /*
-     *  Delay afterwards to check after each cell
-     *
+     *  Test Delay
         disableTimer(1);
         disableTimer(2);
-        __delay32(5000000);
-        __delay32(5000000);
-        __delay32(5000000);
+        FloodFill_floodMaze();
         enableTimer(1);
         enableTimer(2);
     */
 
+
     Position_forwardCell(&mousePos);
 
-    nextMove = getMove();
+    disableTimer(1);
+    disableTimer(2);
+    mouseDelay();
+    nextMove=getMoveFlood();
+    enableTimer(1);
+    enableTimer(2);
+
+
     temp = 0;
     temp2 = 0;
     lMotor.count = 0;
     rMotor.count = 0;
-    sample_flag = 0;
+    sample_flag = FALSE;
     currentCellDist = 0;
 
 }
