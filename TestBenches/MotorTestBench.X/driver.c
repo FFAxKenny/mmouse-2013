@@ -22,10 +22,12 @@
 
 // I forget what this does..something to do with clock
 #pragma config ICS = PGD2
+#pragma config FWDTEN = OFF             // Watchdog Timer Enable bit (Watchdog timer enabled/disabled by user software)
 
 // Configuration Options
 _FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
 _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
+
 
 // Declare the motors
 Motor lMotor;
@@ -85,13 +87,72 @@ int main(void) {
     mouseDelay();
     enableTimer(1);
     enableTimer(2);
+
     while(!isStart(&mousePos)){
         executeMove(nextMove);
     }
+
+    disableTimer(1);
+    disableTimer(2);
+    algorithm = FLOOD_FILL;
+    destX = 7;
+    destY = 7;
+    mouseDelay();
+    enableTimer(1);
+    enableTimer(2);
+
+    while(!isCenter(&mousePos)){
+        executeMove(nextMove);
+    }
+
+
+    disableTimer(1);
+    disableTimer(2);
+    algorithm = FLOOD_FILL;
+    destX = 0;
+    destY = 0;
+    mouseDelay();
+    enableTimer(1);
+    enableTimer(2);
+
     while(1){
+        speedValue = slowSpeedValue;
+        while(!isStart(&mousePos)){
+            executeMove(nextMove);
+        }
+
         disableTimer(1);
         disableTimer(2);
+        algorithm = FLOOD_FILL;
+        destX = 7;
+        destY = 7;
+        mouseDelay();
+        enableTimer(1);
+        enableTimer(2);
+
+        fastSpeedValue -= 2500;
+        speedValue = fastSpeedValue;
+        while(!isCenter(&mousePos)){
+            executeMove(nextMove);
+        }
+
+        disableTimer(1);
+        disableTimer(2);
+        algorithm = FLOOD_FILL;
+        destX = 0;
+        destY = 0;
+        mouseDelay();
+        enableTimer(1);
+        enableTimer(2);
     }
+
+    while(!isStart(&mousePos)){
+        executeMove(nextMove);
+    }
+
+    disableTimer(1);
+    disableTimer(2);
+    while(1);
 }
 
 void executeMove(int move) {

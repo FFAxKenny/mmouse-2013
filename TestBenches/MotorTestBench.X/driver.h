@@ -32,7 +32,9 @@ typedef struct position{
     int right = 0;
     int left = 0;
     int front = 0;
-    int speedValue = 16000;
+    int speedValue = 18000;
+    int slowSpeedValue = 18000;
+    int fastSpeedValue = 18000;
 
     /* Init Routines */
     void initAD(void);
