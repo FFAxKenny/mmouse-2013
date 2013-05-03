@@ -13,6 +13,12 @@
 #include <xc.h>
 #include <dsp.h>
 #include <p33Exxxx.h>
+#include "FloodFill.h"
+#include "Cell.h"
+
+Cell mouseMaze[16][16];
+StackA nextLevel;
+StackA currentLevel;
 
     /* Variables */
     int error = 0;

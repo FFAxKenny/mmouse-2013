@@ -13,6 +13,8 @@
 #include "dirdef.h"
 #include "adc.h"
 #include "config.h"
+#include "FloodFill.h"
+
 #define FLOOD_FILL 0
 #define LEFT_WALL_HUGGER 1
 #define RIGHT_WALL_HUGGER 2
@@ -36,6 +38,13 @@ double currentCellDist = 0;
 int forward_flag = 0;
 int nextMove = 0;
 int sample_flag = 0;
+int floodMoveDone = TRUE;
+
+int floodL;
+int floodR;
+int floodF;
+
+Cell mouseMaze[16][16];
 
 typedef struct position{
     int x;
@@ -45,6 +54,37 @@ typedef struct position{
 
 Position mousePos;
 int algorithm;
+
+void sampleFlood(int *floodL, int *floodF, int *floodR){
+    *floodL = sampleSensor(L90_SENSOR);
+    *floodR = sampleSensor(R90_SENSOR);
+    *floodF = sampleSensor(F1_SENSOR);
+}
+
+int getMoveFlood(void){
+    floodMoveDone = FALSE;
+    if(floodL > LEFT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
+        //turn90(LEFT);
+        //turn90(RIGHT);
+    }
+    if(floodR > RIGHT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
+        //turn90(RIGHT);
+        //turn90(LEFT);
+    }
+    if(floodF > FRONT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
+        //turn360(RIGHT);
+        //turn360(LEFT);
+
+    }
+
+    FloodFill_floodMaze(); 
+    floodMoveDone = TRUE;
+    return globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]), mousePos.dir);
+
+}
 
 void Position_forwardCell(Position *mousePos) {
     switch(mousePos->dir){
@@ -426,6 +466,7 @@ void enableTimer(int n) {
             T2CONbits.TON = 1;                              // Enable Timer
             break;
         case 3:
+            T3CONbits.TON = 1;       // Enable Timer
             break;
         case 4:
             break;
@@ -443,6 +484,7 @@ void disableTimer(int n) {
             T2CONbits.TON = 0;                              // Enable Timer
             break;
         case 3:
+            T3CONbits.TON = 0;       // Enable Timer
             break;
         case 4:
             break;
@@ -467,6 +509,13 @@ void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
             Motor_step(&lMotor);
         __PIN_MotorLStep = lMotor.step;   // Update left motor state
         __PIN_MotorLDir = lMotor.dir;
+}
+void __attribute__((__interrupt__, __auto_psv__)) _T3Interrupt(void){
+        _T1IF = 0;      // Reset the timer flag
+        if( rMotor.enable ) 
+            Motor_step(&rMotor);
+        __PIN_MotorRStep = rMotor.step;   // Update right motor state
+        __PIN_MotorRDir = rMotor.dir;
 }
 
 void updateMotorStates(void)
@@ -674,6 +723,21 @@ void initTimer2(void) {
     _T2IF = 0;
     _T2IE = 1;
     T2CONbits.TON = 0;       // Enable Timer
+}
+
+void initTimer3(void) {
+    /********************************
+     *      Timer1 Configuration
+     ********************************/
+    T3CON = 0;               // Reset T1 Configuration
+    T3CONbits.TCKPS = 0;     // Set the ratio to the highest
+    PR3 = 10000;             // Set the timer
+
+    _T3IP = 1;
+    _T3IF = 0;
+    _T3IE = 1;
+    //T3CONbits.TON = 0;       // Enable Timer
+
 }
 
 /*********************************************************************
