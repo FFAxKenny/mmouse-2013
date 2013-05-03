@@ -130,7 +130,7 @@ int main(void) {
         enableTimer(1);
         enableTimer(2);
 
-        fastSpeedValue -= 2500;
+        fastSpeedValue -= 2000;
         speedValue = fastSpeedValue;
         while(!isCenter(&mousePos)){
             executeMove(nextMove);
@@ -331,9 +331,9 @@ void moveCell(int n)
                 sample_flag = TRUE;
             }
 
-            if(right > 30)
+            if(right > 25)
                 error = right - 60;
-            else if( left > 30)
+            else if( left > 25)
                 error = 60 - left;
             else
                 error = 0;
@@ -342,7 +342,7 @@ void moveCell(int n)
                 tempError = -error;
             else
                 tempError = error;
-            if(tempError < 8)
+            if(tempError < 5)
                 error = 0;
 
             while( (lMotor.count - temp) < 2) {
