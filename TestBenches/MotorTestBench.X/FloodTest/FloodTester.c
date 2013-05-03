@@ -20,20 +20,24 @@ int main() {
     printf("Modify some values\n");
 
     //Maze_putWall(mouseMaze, 0, 0, NORTH);
-    Maze_putWall(mouseMaze, 0, 0, NORTH);
-    Maze_putWall(mouseMaze, 0, 1, NORTH);
-    Maze_putWall(mouseMaze, 0, 2, NORTH);
-    Maze_putWall(mouseMaze, 0, 3, NORTH);
-    Maze_putWall(mouseMaze, 0, 4, NORTH);
-    Maze_putWall(mouseMaze, 0, 5, NORTH);
-    Maze_putWall(mouseMaze, 0, 6, NORTH);
-    Maze_putWall(mouseMaze, 0, 7, NORTH);
-    Maze_putWall(mouseMaze, 0, 8, NORTH);
+    Maze_putWall(mouseMaze, 0, 0, EAST);
+    Maze_putWall(mouseMaze, 1, 0, EAST);
+    Maze_putWall(mouseMaze, 2, 1, SOUTH);
+    Maze_putWall(mouseMaze, 2, 1, NORTH);
+    Maze_putWall(mouseMaze, 2, 2, EAST);
+    Maze_putWall(mouseMaze, 2, 2, SOUTH);
+    Maze_putWall(mouseMaze, 2, 2, NORTH);
+    Maze_putWall(mouseMaze, 3, 0, NORTH);
+    Maze_putWall(mouseMaze, 3, 2, NORTH);
+    Maze_putWall(mouseMaze, 3, 2, EAST);
+    Maze_putWall(mouseMaze, 4, 1, WEST);
+    Maze_putWall(mouseMaze, 5, 1, WEST);
+    Maze_putWall(mouseMaze, 5, 1, EAST);
 
     FloodFill_floodMaze();
     FloodFill_printMaze();
 
-    printf("%d\n", Maze_smallestNeighborDir(&mouseMaze[0][0]) );
+    printf("%d\n", Maze_smallestNeighborDir(&mouseMaze[4][1]) );
 
 
 }

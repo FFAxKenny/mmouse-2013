@@ -98,7 +98,7 @@ void Maze_putWall(Cell maze[][16], int y, int x, int dir) {
             break;
         case WEST:
             mouseMaze[y][x].west = 1;
-            if(x >=15) mouseMaze[y][x-1].east = 1;
+            if(x>=0) mouseMaze[y][x-1].east = 1;
             break;
         default:
             break;

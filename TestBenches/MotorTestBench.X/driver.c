@@ -71,15 +71,8 @@ int main(void) {
     enableTimer(1);
     enableTimer(2);
 
-    while(1)
-    {
-        while(!isCenter(&mousePos)){
-            executeMove(nextMove);
-        }
-    }
-    while(1){
-        disableTimer(1);
-        disableTimer(2);
+    while(!isCenter(&mousePos)){
+        executeMove(nextMove);
     }
     algorithm = RIGHT_WALL_HUGGER;
     turn360(1);
@@ -261,7 +254,7 @@ void moveCell(int n)
             temp = lMotor.count;
             sampleAllSensors();
 
-            if(currentCellDist > (700) &&
+            if(currentCellDist > (850) &&
                     sample_flag == FALSE) {
                 Position_forwardCell(&mousePos);
                 disableTimer(1);
