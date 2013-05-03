@@ -68,7 +68,6 @@ int main(void) {
 
     ADC1BUF0 = 0;                                   // Clear the buffer sampleAllSensors();
 
-
     powerMotors(ON);
     nextMove=getMove(algorithm);
 
@@ -239,7 +238,7 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE)
+    while( currentCellDist < CELL_DISTANCE && front < 250)
     {
 
             /*
