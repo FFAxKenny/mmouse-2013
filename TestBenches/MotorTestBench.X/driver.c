@@ -272,9 +272,9 @@ void moveCell(int n)
             }
 
             if(right > 30)
-                error = right - 55;
-            else if( left > 20)
-                error = 65 - left;
+                error = right - 60;
+            else if( left > 30)
+                error = 60 - left;
             else
                 error = 0;
 
