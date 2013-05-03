@@ -33,6 +33,13 @@ _FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
 Motor lMotor;
 Motor rMotor;
 
+int pK = 50;
+int pD = 250;
+int pKdefault = 50; 
+int pDdefault = 250;
+int savedpK;
+int savedpD;
+
 void mouseDelay(void);
 void alignToFront(void);
 
@@ -52,7 +59,12 @@ int algorithm;
 int destY;
 int destX;
 
-int timerBaseVal = 18000;
+int normalV = 20000;
+int timerBaseVal = 20000;
+int accelRate = 1;
+int decelRate = 1;
+int finalAccelV = 20000;
+int finalDecelV = 20000;
 
 int main(void) {
     double k;
@@ -103,25 +115,46 @@ int main(void) {
     enableTimer(1);
     enableTimer(2);
 
-    while(!isCenter(&mousePos)){
-        executeMove(nextMove);
-    }
+    accelRate = 10;
+    finalAccelV = 16000;
+    decelRate = 50;
+    finalDecelV = 20000;
+    int savedAccelRate;
+    int savedFinalAccelV;
 
-
-    disableTimer(1);
-    disableTimer(2);
-    algorithm = FLOOD_FILL;
-    destX = 0;
-    destY = 0;
-    mouseDelay();
-    enableTimer(1);
-    enableTimer(2);
 
     while(1){
-        speedValue = slowSpeedValue;
+        while(!isCenter(&mousePos)){
+            executeMove(nextMove);
+        }
+
+        // save the last acceleration values
+        savedAccelRate = accelRate;
+        savedFinalAccelV = finalAccelV;
+        savedpK = pK;
+        savedpD = pD;
+
+        disableTimer(1);
+        disableTimer(2);
+        algorithm = FLOOD_FILL;
+        destX = 0;
+        destY = 0;
+        accelRate = 0;
+        pK = pKdefault;
+        pD = pDdefault;
+        timerBaseVal = normalV;
+        mouseDelay();
+        enableTimer(1);
+        enableTimer(2);
+
         while(!isStart(&mousePos)){
             executeMove(nextMove);
         }
+
+        accelRate = savedAccelRate;
+        finalAccelV = savedFinalAccelV;
+        pK = savedpK;
+        pD = savedpD;
 
         disableTimer(1);
         disableTimer(2);
@@ -131,21 +164,13 @@ int main(void) {
         mouseDelay();
         enableTimer(1);
         enableTimer(2);
+    
+        //accelRate = 2;
+        accelRate = accelRate + 1;
+        finalAccelV = finalAccelV - 2300;
+        pK = pK - 3;
+        pD = pD - 13;
 
-        fastSpeedValue -= 2000;
-        speedValue = fastSpeedValue;
-        while(!isCenter(&mousePos)){
-            executeMove(nextMove);
-        }
-
-        disableTimer(1);
-        disableTimer(2);
-        algorithm = FLOOD_FILL;
-        destX = 0;
-        destY = 0;
-        mouseDelay();
-        enableTimer(1);
-        enableTimer(2);
     }
 
     while(!isStart(&mousePos)){
@@ -162,19 +187,19 @@ void executeMove(int move) {
         case LEFT:
             forward_flag = 0;
             turn90(LEFT);
-            timerBaseVal = 18000;
+            timerBaseVal = 20000;
             moveCell(1);
             break;
         case RIGHT:
             forward_flag = 0;
             turn90(RIGHT);
-            timerBaseVal = 18000;
+            timerBaseVal = 20000;
             moveCell(1);
             break;
         case BACKWARD:
             forward_flag = 0;
             turn360(1);
-            timerBaseVal = 18000;
+            timerBaseVal = 20000;
             moveCell(1);
             break;
         case FORWARD:
@@ -289,6 +314,9 @@ void alignToFront(void)
 
 /* Change the PR values by given rate*/
 void accelerate(int rate, int finalValue) {
+    int accelerateLeft;
+    //accelerateLeft = finalValue - timerBaseVal;
+    //rate = (1 + accelerateLeft/1000)*(1 + accelerateLeft/1000);
     if( timerBaseVal > finalValue )
         timerBaseVal = timerBaseVal - rate;
 }
@@ -315,7 +343,7 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 250) {
+    while( currentCellDist < CELL_DISTANCE && front < 300) {
             currentCellDist = lMotor.count - temp2;
             temp = lMotor.count;
             sampleAllSensors();
@@ -328,15 +356,14 @@ void moveCell(int n)
                 sample_flag = TRUE;
             }
 
-
             if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD && sample_flag ==TRUE)
-                decelerate(50, 30000);
+                decelerate(decelRate, finalDecelV);
             else
-                accelerate(20, 13500);
+                accelerate(accelRate, finalAccelV);
 
             if(right > 25)
                 error = right - 60;
-            else if( left > 25)
+            else if( left > 20)
                 error = 60 - left;
             else
                 error = 0;
@@ -512,7 +539,7 @@ void updateMotorStates(void)
  *      Routine Functions
  *********************************************************************/ 
 inline void waitForStart(void){
-    while( sampleSensor(R90_SENSOR) < 300 );         // Wait for start input
+    while( sampleSensor(R90_SENSOR) < 400 );         // Wait for start input
 }
 inline void powerEmitters(int state){
 

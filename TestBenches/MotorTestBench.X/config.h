@@ -3,7 +3,7 @@
 #define TIMER_DELAY 50000
 #define TIMER_RATIO 1
 
-#define CELL_DISTANCE 392*4
+#define CELL_DISTANCE 385*4
 #define DISTANCE_360 (125*2*4)
 #define DISTANCE_90  124*4
 
@@ -13,7 +13,5 @@
 #define NOMINAL_RIGHT_VALUE     130
 #define NOMINAL_LEFT_VALUE      141
 
-#define pK 45
-#define pD 250
 
 
