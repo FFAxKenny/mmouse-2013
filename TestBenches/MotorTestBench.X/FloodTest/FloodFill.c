@@ -134,7 +134,6 @@ void FloodFill_initMaze(void){
     for( i = 0; i < 16 ; i++)
         mouseMaze[15][i].north = TRUE;
 
-    //Mouse_printMaze();
     // initialize the maze with the correct flood values
     //printf("%d\n", &mouseMaze[7][7]);
 
@@ -277,7 +276,6 @@ int Maze_smallestNeighborDir(Cell *c){
             printf("making east smallest\n");
             smallestFloodValue = floodValue;
             smallest = EAST;
-            
         }
 
     }

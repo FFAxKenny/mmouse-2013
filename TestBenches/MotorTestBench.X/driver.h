@@ -20,6 +20,12 @@ Cell mouseMaze[16][16];
 StackA nextLevel;
 StackA currentLevel;
 
+typedef struct position{
+    int x;
+    int y;
+    int dir;
+} Position;
+
     /* Variables */
     int error = 0;
     int prevError = 0;
@@ -68,4 +74,20 @@ StackA currentLevel;
     /* Misc */
     void executeMove(int move);
     int getMove(int a);
-    int abs (int n);
+    int abs(int n);
+
+    /* FloodFill Moves */
+    int getMoveFlood(void);
+    void sampleFlood(int *floodL, int *floodF, int *floodR);
+    void mapWalls(void);
+    int isCenter(Position *p);
+    int isStart(Position *p);
+    
+    /* Position Functions */
+    void Position_forwardCell(Position *mousePos);
+    void Position_updateDirection(Position *mousePos, int turn);
+
+
+
+
+

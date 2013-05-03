@@ -45,114 +45,18 @@ int floodR;
 int floodF;
 
 Cell mouseMaze[16][16];
-
-typedef struct position{
-    int x;
-    int y;
-    int dir;
-} Position;
-
 Position mousePos;
 int algorithm;
 
-void sampleFlood(int *floodL, int *floodF, int *floodR){
-    *floodL = sampleSensor(L90_SENSOR);
-    *floodR = sampleSensor(R90_SENSOR);
-    *floodF = sampleSensor(F1_SENSOR);
-}
-
-int getMoveFlood(void){
-    floodMoveDone = FALSE;
-    if(floodL > LEFT_THRESHOLD) {
-        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
-        //turn90(LEFT);
-        //turn90(RIGHT);
-    }
-    if(floodR > RIGHT_THRESHOLD) {
-        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
-        //turn90(RIGHT);
-        //turn90(LEFT);
-    }
-    if(floodF > FRONT_THRESHOLD) {
-        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
-        //turn360(RIGHT);
-        //turn360(LEFT);
-
-    }
-
-    FloodFill_floodMaze(); 
-    floodMoveDone = TRUE;
-    return globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]), mousePos.dir);
-
-}
-
-void Position_forwardCell(Position *mousePos) {
-    switch(mousePos->dir){
-        case NORTH:
-            mousePos->y++;
-            break;
-        case EAST:
-            mousePos->x++;
-            break;
-        case WEST:
-            mousePos->x--;
-            break;
-        case SOUTH:
-            mousePos->y--;
-            break;
-        default:
-            break;
-    }
-
-}
-
-void Position_updateDirection(Position *mousePos, int turn) {
-    switch(turn){
-        case RIGHT:
-            if(mousePos->dir == NORTH) mousePos->dir = EAST;
-            else if(mousePos->dir == EAST) mousePos->dir = SOUTH;
-            else if(mousePos->dir == WEST) mousePos->dir = NORTH;
-            else if(mousePos->dir == SOUTH) mousePos->dir = WEST;
-            break;
-        case LEFT:
-            if(mousePos->dir == NORTH) mousePos->dir = WEST;
-            else if(mousePos->dir == EAST) mousePos->dir = NORTH;
-            else if(mousePos->dir == WEST) mousePos->dir = SOUTH;
-            else if(mousePos->dir == SOUTH) mousePos->dir = EAST;
-            break;
-        case BACKWARD:
-            if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
-            else if(mousePos->dir == WEST) mousePos->dir = EAST;
-            else if(mousePos->dir == EAST) mousePos->dir = WEST;
-            else mousePos->dir = NORTH;
-            break;
-        default:    
-            break;
-    }
-
-}
-
-int isCenter(Position *p) {
-    if(p->x==8 && p->y==7) return TRUE;
-    else if(p->x==7 && p->y==8) return TRUE;
-    else if(p->x==8 && p->y==8) return TRUE;
-    else if(p->x==7 && p->y==7) return TRUE;
-    else return FALSE;
-}
-
-int isStart(Position *p) {
-    if(p->x==0 && p->y==0) return TRUE;
-    else return FALSE;
-}
-
 int main(void) {
     double k;
-    algorithm = LEFT_WALL_HUGGER;
+    algorithm = FLOOD_FILL;
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
 
     initRoutine();
+    FloodFill_initMaze();
 
     LATBbits.LATB13 = 1;                            // Disable Motors
     waitForStart();                                 // Wait for the start input
@@ -160,12 +64,22 @@ int main(void) {
 
     ADC1BUF0 = 0;                                   // Clear the buffer sampleAllSensors();
 
+
     powerMotors(ON);
+    nextMove=getMove(algorithm);
+
     enableTimer(1);
     enableTimer(2);
-    nextMove=getMove(algorithm);
-    while(!isCenter(&mousePos)){
-        executeMove(nextMove);
+
+    while(1)
+    {
+        while(!isCenter(&mousePos)){
+            executeMove(nextMove);
+        }
+    }
+    while(1){
+        disableTimer(1);
+        disableTimer(2);
     }
     algorithm = RIGHT_WALL_HUGGER;
     turn360(1);
@@ -176,13 +90,10 @@ int main(void) {
         disableTimer(1);
         disableTimer(2);
     }
-
-
-
 }
+
 void executeMove(int move) {
-    switch(move)
-    {
+    switch(move) {
         case LEFT:
             forward_flag = 0;
             turn90(LEFT);
@@ -249,7 +160,7 @@ int getMove(int a){
             }
             break;
         case FLOOD_FILL:
-            return FORWARD;
+            return getMoveFlood();
             break;
         default: 
             return FORWARD;
@@ -258,7 +169,6 @@ int getMove(int a){
 
 }
     
-
 void sampleAllSensors(){
     int tempLeft = 0;
     int tempRight = 0;
@@ -275,6 +185,8 @@ void sampleAllSensors(){
     right = tempRight/sampleNumber;
     front = tempFront/sampleNumber;
 }
+
+
 
 void mouseDelay(void) {
     __delay32(5000000);
@@ -318,11 +230,13 @@ void moveCell(int n)
     int tempError = 0;
     int accel = speedValue;
     forward_flag = 1;
+    enableTimer(1);
+    enableTimer(2);
 
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 200)
+    while( currentCellDist < CELL_DISTANCE)
     {
 
             /*
@@ -347,10 +261,16 @@ void moveCell(int n)
             temp = lMotor.count;
             sampleAllSensors();
 
-            if(currentCellDist > (1000) &&
+            if(currentCellDist > (700) &&
                     sample_flag == FALSE) {
                 Position_forwardCell(&mousePos);
+                disableTimer(1);
+                disableTimer(2);
                 nextMove = getMove(algorithm);
+                enableTimer(1);
+                enableTimer(2);
+                    
+
                 sample_flag = TRUE;
             }
 
@@ -386,6 +306,11 @@ void moveCell(int n)
         rMotor.count = 0;
         sample_flag = 0;
         currentCellDist = 0;
+        disableTimer(1);
+        disableTimer(2);
+        mouseDelay();
+        enableTimer(1);
+        enableTimer(2);
 
 }
 int abs (int n) {
@@ -424,8 +349,6 @@ void turn90(int direction) {
     __delay32(5000000);
     __delay32(5000000);
     sampleAllSensors();
-    enableTimer(1);
-    enableTimer(2);
 }
 
 void turn360(int direction) {
@@ -453,8 +376,6 @@ void turn360(int direction) {
     PR1= 16000;
     PR2= 16000;
     sampleAllSensors();
-    enableTimer(1);
-    enableTimer(2);
 }
 
 void enableTimer(int n) {
@@ -510,12 +431,9 @@ void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void){
         __PIN_MotorLStep = lMotor.step;   // Update left motor state
         __PIN_MotorLDir = lMotor.dir;
 }
+// Timer 3 Service Routine
 void __attribute__((__interrupt__, __auto_psv__)) _T3Interrupt(void){
-        _T1IF = 0;      // Reset the timer flag
-        if( rMotor.enable ) 
-            Motor_step(&rMotor);
-        __PIN_MotorRStep = rMotor.step;   // Update right motor state
-        __PIN_MotorRDir = rMotor.dir;
+        _T3IF = 0;      // Reset the timer flag
 }
 
 void updateMotorStates(void)
@@ -727,7 +645,7 @@ void initTimer2(void) {
 
 void initTimer3(void) {
     /********************************
-     *      Timer1 Configuration
+     *      Timer3 Configuration
      ********************************/
     T3CON = 0;               // Reset T1 Configuration
     T3CONbits.TCKPS = 0;     // Set the ratio to the highest
@@ -760,5 +678,121 @@ void initRoutine(void)
     initTimer2();
     initPLL();
     initAD();
+}
+
+/*
+ * 
+ * FloodFill Helper Functions 
+ *
+ */
+
+void sampleFlood(int *floodL, int *floodF, int *floodR){
+    int tempLeft = 0;
+    int tempRight = 0;
+    int tempFront = 0;
+    int sampleNumber = 3;
+    int i; 
+
+    for( i = 0; i < sampleNumber ; i++) {
+        tempLeft = tempLeft + sampleSensor(L90_SENSOR);
+        tempRight = tempRight + sampleSensor(R90_SENSOR); 
+        tempFront = tempFront + sampleSensor(F1_SENSOR);
+    }
+    *floodL = tempLeft/sampleNumber;
+    *floodR = tempRight/sampleNumber;
+    *floodF = tempFront/sampleNumber;
+}
+
+void mapWalls(void){
+    sampleFlood(&floodL, &floodF, &floodR);
+    if(floodL > LEFT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
+        //turn90(LEFT);
+        //turn90(RIGHT);
+    }
+    if(floodR > RIGHT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
+        //turn90(RIGHT);
+        //turn90(LEFT);
+    }
+    if(floodF > FRONT_THRESHOLD) {
+        Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
+        //turn360(RIGHT);
+        //turn360(LEFT);
+
+    }
+}
+
+int getMoveFlood(void){
+    floodMoveDone = FALSE;
+    mapWalls();
+    FloodFill_floodMaze(); 
+    floodMoveDone = TRUE;
+    return globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]), mousePos.dir);
+}
+
+int isCenter(Position *p) {
+    if(p->x==8 && p->y==7) return TRUE;
+    else if(p->x==7 && p->y==8) return TRUE;
+    else if(p->x==8 && p->y==8) return TRUE;
+    else if(p->x==7 && p->y==7) return TRUE;
+    else return FALSE;
+}
+
+int isStart(Position *p) {
+    if(p->x==0 && p->y==0) return TRUE;
+    else return FALSE;
+}
+
+/*
+ * 
+ * Position Functions
+ *
+ */
+
+void Position_forwardCell(Position *mousePos) {
+    switch(mousePos->dir){
+        case NORTH:
+            mousePos->y++;
+            break;
+        case EAST:
+            mousePos->x++;
+            break;
+        case WEST:
+            mousePos->x--;
+            break;
+        case SOUTH:
+            mousePos->y--;
+            break;
+        default:
+            break;
+    }
+
+}
+
+void Position_updateDirection(Position *mousePos, int turn) {
+    switch(turn){
+        case RIGHT:
+            if(mousePos->dir == NORTH) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = NORTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = WEST;
+            break;
+        case LEFT:
+            if(mousePos->dir == NORTH) mousePos->dir = WEST;
+            else if(mousePos->dir == EAST) mousePos->dir = NORTH;
+            else if(mousePos->dir == WEST) mousePos->dir = SOUTH;
+            else if(mousePos->dir == SOUTH) mousePos->dir = EAST;
+            break;
+        case BACKWARD:
+            if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
+            else if(mousePos->dir == WEST) mousePos->dir = EAST;
+            else if(mousePos->dir == EAST) mousePos->dir = WEST;
+            else mousePos->dir = NORTH;
+            break;
+        default:    
+            break;
+    }
+
 }
 
