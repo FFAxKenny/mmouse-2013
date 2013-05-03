@@ -13,6 +13,10 @@
 #include "dirdef.h"
 #include "adc.h"
 #include "config.h"
+#define FLOOD_FILL 0
+#define LEFT_WALL_HUGGER 1
+#define RIGHT_WALL_HUGGER 2
+#define ALGORITHM 1
 
 // I forget what this does..something to do with clock
 #pragma config ICS = PGD2
@@ -40,6 +44,7 @@ typedef struct position{
 } Position;
 
 Position mousePos;
+int algorithm;
 
 void Position_forwardCell(Position *mousePos) {
     switch(mousePos->dir){
@@ -60,6 +65,7 @@ void Position_forwardCell(Position *mousePos) {
     }
 
 }
+
 void Position_updateDirection(Position *mousePos, int turn) {
     switch(turn){
         case RIGHT:
@@ -78,7 +84,7 @@ void Position_updateDirection(Position *mousePos, int turn) {
             if(mousePos->dir == NORTH) mousePos->dir = SOUTH;
             else if(mousePos->dir == WEST) mousePos->dir = EAST;
             else if(mousePos->dir == EAST) mousePos->dir = WEST;
-            else mousePos->dir == NORTH;
+            else mousePos->dir = NORTH;
             break;
         default:    
             break;
@@ -94,9 +100,14 @@ int isCenter(Position *p) {
     else return FALSE;
 }
 
+int isStart(Position *p) {
+    if(p->x==0 && p->y==0) return TRUE;
+    else return FALSE;
+}
+
 int main(void) {
     double k;
-
+    algorithm = LEFT_WALL_HUGGER;
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
@@ -112,9 +123,13 @@ int main(void) {
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
-    nextMove=getMove();
-
+    nextMove=getMove(algorithm);
     while(!isCenter(&mousePos)){
+        executeMove(nextMove);
+    }
+    algorithm = RIGHT_WALL_HUGGER;
+    turn360(1);
+    while(!isStart(&mousePos)){
         executeMove(nextMove);
     }
     while(1){
@@ -125,8 +140,7 @@ int main(void) {
 
 
 }
-void executeMove(int move)
-{
+void executeMove(int move) {
     switch(move)
     {
         case LEFT:
@@ -154,29 +168,54 @@ void executeMove(int move)
     }
 }
 
-
-int getMove(void){
+int getMove(int a){
     sampleAllSensors();
-    if(left < LEFT_THRESHOLD) {
-        return LEFT;
-    }
-    // if left is covered
-    else {
-        // if front is open
-        if(front < FRONT_THRESHOLD) {
-            return FORWARD;
-        }
-        // if front is closed
-        else {
-            // if right is open
-            if(right < RIGHT_THRESHOLD)
+    switch(a){
+        case LEFT_WALL_HUGGER:
+            if(left < LEFT_THRESHOLD) {
+                return LEFT;
+            }
+            // if left is covered
+            else {
+                // if front is open
+                if(front < FRONT_THRESHOLD) {
+                    return FORWARD;
+                }
+                // if front is closed
+                else {
+                    // if right is open
+                    if(right < RIGHT_THRESHOLD)
+                        return RIGHT;
+                    // if right is closed
+                    else
+                        return BACKWARD;
+                }
+            }
+            break;
+        case RIGHT_WALL_HUGGER:
+            if(right < RIGHT_THRESHOLD) {
                 return RIGHT;
-            // if right is closed
-            else
-                return BACKWARD;
-        }
-
+            }
+            else {
+                if(front < FRONT_THRESHOLD) {
+                    return FORWARD;
+                }
+                else {
+                    if(left < LEFT_THRESHOLD)
+                        return LEFT;
+                    else
+                        return BACKWARD;
+                }
+            }
+            break;
+        case FLOOD_FILL:
+            return FORWARD;
+            break;
+        default: 
+            return FORWARD;
+            break;
     }
+
 }
     
 
@@ -237,7 +276,7 @@ void moveCell(int n)
     double temp2;
     int error = 0;
     int tempError = 0;
-    int accel = 30000;
+    int accel = speedValue;
     forward_flag = 1;
 
     temp2 = lMotor.count;
@@ -246,6 +285,7 @@ void moveCell(int n)
     while( currentCellDist < CELL_DISTANCE && front < 200)
     {
 
+            /*
             if(forward_flag == 1) {
                 accel = speedValue;
             }
@@ -261,14 +301,16 @@ void moveCell(int n)
                         accel += 20;
                 }
             }
+            */
 
             currentCellDist = lMotor.count - temp2;
             temp = lMotor.count;
             sampleAllSensors();
 
-            if(currentCellDist > (1000 ) &&
+            if(currentCellDist > (1000) &&
                     sample_flag == FALSE) {
-                nextMove=getMove();
+                Position_forwardCell(&mousePos);
+                nextMove = getMove(algorithm);
                 sample_flag = TRUE;
             }
 
@@ -291,30 +333,19 @@ void moveCell(int n)
                     PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
                     prevError = error;
             }
-
     }
+        
 
-    /*
-     *  Delay afterwards to check after each cell
-     *
-        disableTimer(1);
-        disableTimer(2);
-        __delay32(5000000);
-        __delay32(5000000);
-        __delay32(5000000);
-        enableTimer(1);
-        enableTimer(2);
-    */
-
-    Position_forwardCell(&mousePos);
-
-    nextMove = getMove();
-    temp = 0;
-    temp2 = 0;
-    lMotor.count = 0;
-    rMotor.count = 0;
-    sample_flag = 0;
-    currentCellDist = 0;
+        /*
+        Position_forwardCell(&mousePos);
+        nextMove = getMove(algorithm);
+        */
+        temp = 0;
+        temp2 = 0;
+        lMotor.count = 0;
+        rMotor.count = 0;
+        sample_flag = 0;
+        currentCellDist = 0;
 
 }
 int abs (int n) {

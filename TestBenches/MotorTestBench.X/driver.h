@@ -61,5 +61,5 @@
 
     /* Misc */
     void executeMove(int move);
-    int getMove(void);
+    int getMove(int a);
     int abs (int n);
