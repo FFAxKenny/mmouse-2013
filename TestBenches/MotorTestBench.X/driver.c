@@ -309,11 +309,13 @@ void moveCell(int n)
         rMotor.count = 0;
         sample_flag = 0;
         currentCellDist = 0;
+        /*
         disableTimer(1);
         disableTimer(2);
         mouseDelay();
         enableTimer(1);
         enableTimer(2);
+        */
 
 }
 int abs (int n) {
