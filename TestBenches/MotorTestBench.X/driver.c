@@ -162,16 +162,19 @@ void executeMove(int move) {
         case LEFT:
             forward_flag = 0;
             turn90(LEFT);
+            timerBaseVal = 18000;
             moveCell(1);
             break;
         case RIGHT:
             forward_flag = 0;
             turn90(RIGHT);
+            timerBaseVal = 18000;
             moveCell(1);
             break;
         case BACKWARD:
             forward_flag = 0;
             turn360(1);
+            timerBaseVal = 18000;
             moveCell(1);
             break;
         case FORWARD:
@@ -287,13 +290,13 @@ void alignToFront(void)
 /* Change the PR values by given rate*/
 void accelerate(int rate, int finalValue) {
     if( timerBaseVal > finalValue )
-        timerBaseVal -= rate;
+        timerBaseVal = timerBaseVal - rate;
 }
 
 /* Change the PR values by given rate*/
 void decelerate(int rate, int finalValue){
     if( timerBaseVal < finalValue )
-        timerBaseVal +=rate;
+        timerBaseVal = timerBaseVal + rate;
 }
 
 
@@ -313,8 +316,6 @@ void moveCell(int n)
     currentCellDist = lMotor.count - temp2;
 
     while( currentCellDist < CELL_DISTANCE && front < 250) {
-
-
             currentCellDist = lMotor.count - temp2;
             temp = lMotor.count;
             sampleAllSensors();
@@ -327,10 +328,11 @@ void moveCell(int n)
                 sample_flag = TRUE;
             }
 
-            if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD)
-                decelerate(15,21000);
+
+            if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD && sample_flag ==TRUE)
+                decelerate(50, 30000);
             else
-                accelerate(4,13000);
+                accelerate(20, 13500);
 
             if(right > 25)
                 error = right - 60;
@@ -352,9 +354,11 @@ void moveCell(int n)
                     prevError = error;
             }
     }
-        
 
+        if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD)
+            timerBaseVal = 18000;
         /*
+         *
         Position_forwardCell(&mousePos);
         nextMove = getMove(algorithm);
         */
@@ -371,8 +375,6 @@ void moveCell(int n)
         enableTimer(1);
         enableTimer(2);
         */
-        if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD)
-            timerBaseVal = 18000;
 
 }
 int abs (int n) {
