@@ -14,7 +14,7 @@ void Maze_putWall(Cell maze[][16], int y, int x, int dir) {
             break;
         case EAST:
             mouseMaze[y][x].east = 1;
-            if(x <= 15) mouseMaze[y][x-1].west = 1;
+            if(x <= 15) mouseMaze[y][x+1].west = 1;
             break;
         case SOUTH:
             mouseMaze[y][x].south = 1;
@@ -22,7 +22,7 @@ void Maze_putWall(Cell maze[][16], int y, int x, int dir) {
             break;
         case WEST:
             mouseMaze[y][x].west = 1;
-            if(x >=15) mouseMaze[y][x+1].east = 1;
+            if(x >=15) mouseMaze[y][x-1].east = 1;
             break;
         default:
             break;
@@ -86,7 +86,6 @@ void FloodFill_initMaze(void){
         }
     }
 }
-
 
 void FloodFill_floodMaze(void){
     int i = 0;
@@ -193,36 +192,48 @@ int Maze_smallestNeighborDir(Cell *c){
     int floodValue;
     int smallestFloodValue = 100;
 
+    printf("Entering Maze_smallestNeighborDir\n");
+    printf("Cell %d %d\n", c->y, c->x);
     if((c->east)==0){
         floodValue = mouseMaze[c->y][c->x+1].floodValue;
-        //printf("east is empty with floodValue %d\n",floodValue );
+        printf("east is empty with floodValue %d\n",floodValue );
         if(floodValue < smallestFloodValue) {
-            //printf("making east smallest\n");
+            printf("making east smallest\n");
+            smallestFloodValue = floodValue;
             smallest = EAST;
+            
         }
 
     }
 
     if((c->south)==0){
         floodValue = mouseMaze[c->y-1][c->x].floodValue;
-        //printf("south is empty with floodValue %d\n",floodValue );
+        printf("south is empty with floodValue %d\n",floodValue );
         if(floodValue < smallestFloodValue)
+        {
+            smallestFloodValue = floodValue;
             smallest = SOUTH;
-
+        }
     }
 
     if((c->west)==0){
         floodValue = mouseMaze[c->y][c->x-1].floodValue;
-        //printf("west is empty with floodValue %d\n",floodValue );
+        printf("west is empty with floodValue %d\n",floodValue );
         if(floodValue < smallestFloodValue)
+        {
+            smallestFloodValue = floodValue;
             smallest = WEST;
+        }
     }
 
     if((c->north)==0){
         floodValue = mouseMaze[c->y+1][c->x].floodValue;
-        //printf("north is empty with floodValue %d\n", floodValue);
+        printf("north is empty with floodValue %d\n", floodValue);
         if(floodValue < smallestFloodValue)
+        {
+            smallestFloodValue = floodValue;
             smallest = NORTH;
+        }
     }
     //printf("returning %d\n\n\n\n", smallest);
     return smallest;

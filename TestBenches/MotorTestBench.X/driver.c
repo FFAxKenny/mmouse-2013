@@ -27,18 +27,39 @@ StackA currentLevel;
 double currentCellDist = 0;
 int forward_flag = 0;
 int nextMove = 0;
-int sample_flag = 0;
 
 Position mousePos;
 int localToGlobalDir(int localDir, int currDir);
 int globalToLocalDir(int globalDir, int currDir);
 int getMoveFlood(void);
+int floodMoveDone= 1;
+int floodR;
+int floodL;
+int floodF;
+
+void sampleSensors(int *L, int *F, int *R) {
+    *L += sampleSensor(L90_SENSOR);
+    *R += sampleSensor(R90_SENSOR);
+    *F += sampleSensor(F1_SENSOR);
+    *L += sampleSensor(L90_SENSOR);
+    *R += sampleSensor(R90_SENSOR);
+    *F += sampleSensor(F1_SENSOR);
+    *L += sampleSensor(L90_SENSOR);
+    *R += sampleSensor(R90_SENSOR);
+    *F += sampleSensor(F1_SENSOR);
+    *L = (*L)/3;
+    *R = (*R)/3;
+    *F = (*F)/3;
+}
+
+
 
 int main(void) {
     double k;
     
     initRoutine();
 
+    LATBbits.LATB13 = 1;                            // Disable Motors
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
@@ -46,29 +67,30 @@ int main(void) {
     FloodFill_initMaze();
     //funMazeInit();
 
-    LATBbits.LATB13 = 1;                            // Disable Motors
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
     ADC1BUF0 = 0;                                   // Clear the buffer sampleAllSensors();
-
     powerMotors(ON);
     enableTimer(1);
     enableTimer(2);
+
+    /*
     Maze_putWall(mouseMaze, mousePos.y, mousePos.x, NORTH);
     Maze_putWall(mouseMaze, 0 , 1 , NORTH);
     Maze_putWall(mouseMaze, 0 , 2 , NORTH);
     Maze_putWall(mouseMaze, 0 , 3 , NORTH);
     nextMove = globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[0][0]), mousePos.dir);
-    /*
-    nextMove=getMoveFlood();
     */
 
-    while(!isCenter(&mousePos) && mouseMaze[1][0].south == 1){
+    sampleSensors(&floodL, &floodF, &floodR);
+    nextMove=getMoveFlood();
+
+    while(!isCenter(&mousePos)){
         executeMove(nextMove);
     }
     while(1){
-        disableTimer(1);
+        disableTimer(1); 
         disableTimer(2);
     }
 
@@ -117,8 +139,7 @@ void executeMove(int move)
  */
 
 int globalToLocalDir(int globalDir, int currDir){
-    switch(currDir)
-    {
+    switch(currDir) {
         case NORTH:
             return globalDir;
             break;
@@ -152,8 +173,7 @@ int globalToLocalDir(int globalDir, int currDir){
  *
  */
 int localToGlobalDir(int localDir, int currDir){
-    switch(currDir)
-    {
+    switch(currDir) {
         case NORTH:
             if(localDir == LEFT) return WEST;
             else if(localDir == FRONT) return NORTH;
@@ -185,16 +205,27 @@ int localToGlobalDir(int localDir, int currDir){
  * 
  */
 int getMoveFlood(void){
-    sampleAllSensors();
-    if(left > LEFT_THRESHOLD)
+    floodMoveDone = FALSE;
+    if(floodL > LEFT_THRESHOLD) {
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(LEFT, mousePos.dir));
-    if(right > RIGHT_THRESHOLD)
+        //turn90(LEFT);
+        //turn90(RIGHT);
+    }
+    if(floodR > RIGHT_THRESHOLD) {
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(RIGHT, mousePos.dir));
-    if(front > FRONT_THRESHOLD)
+        //turn90(RIGHT);
+        //turn90(LEFT);
+    }
+    if(floodF > FRONT_THRESHOLD) {
         Maze_putWall(mouseMaze, mousePos.y, mousePos.x, localToGlobalDir(FRONT, mousePos.dir));
+        //turn360(RIGHT);
+        //turn360(LEFT);
+
+    }
 
     FloodFill_floodMaze(); 
-    return Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]);
+    floodMoveDone = TRUE;
+    return globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]), mousePos.dir);
 
 }
 
@@ -258,85 +289,39 @@ void moveCell(int n)
     double temp2;
     int error = 0;
     int tempError = 0;
-    int accel = 30000;
+    int accel = 25000;
     forward_flag = 1;
+    int sample_flag = FALSE;
 
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
+    while( currentCellDist < CELL_DISTANCE) {
+        currentCellDist = lMotor.count - temp2;
+        temp = lMotor.count;
 
-    while( currentCellDist < CELL_DISTANCE ) {
+        if(currentCellDist > (800) && sample_flag == FALSE) {
+            sample_flag = TRUE;
+        }
 
-            if(forward_flag == 1) {
-                accel = speedValue;
-            }
-            else if(currentCellDist < CELL_DISTANCE/2) {
-                // Accelerate
-                if(accel > speedValue) {
-                        accel -= 20;
-                }
-            }
-            else if(currentCellDist >= CELL_DISTANCE/2) {
-                // Decelearate
-                if(accel < speedValue) {
-                        accel += 20;
-                }
-            }
+        sampleAllSensors();
+        if(right > 35) error = right - 150;
+        else if( left > 35 ) error = 150 - left;
+        else error = 0;
 
-            currentCellDist = lMotor.count - temp2;
-            temp = lMotor.count;
-            sampleAllSensors();
+        if(error < 0) tempError = -error;
+        else tempError = error;
+        if(tempError < 8) error = 0;
 
-            if(currentCellDist > (1000 ) &&
-                    sample_flag == FALSE) {
-                disableTimer(1);
-                disableTimer(2);
-                //nextMove=getMoveFlood();
-                enableTimer(1);
-                enableTimer(2);
-                sample_flag = TRUE;
-            }
-
-            if(right > 30)
-                error = right - 55;
-            else if( left > 20)
-                error = 65 - left;
-            else
-                error = 0;
-
-            if(error < 0)
-                tempError = -error;
-            else
-                tempError = error;
-            if(tempError < 8)
-                error = 0;
-
-            while( (lMotor.count - temp) < 2) {
-                    PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
-                    PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
-                    prevError = error;
-            }
+        while( (lMotor.count - temp) < 2) {
+            PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
+            PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor prevError = error;
+        }
 
     }
 
-    /*
-     *  Test Delay
-        disableTimer(1);
-        disableTimer(2);
-        FloodFill_floodMaze();
-        enableTimer(1);
-        enableTimer(2);
-    */
-
-
     Position_forwardCell(&mousePos);
-
-    disableTimer(1);
-    disableTimer(2);
-    mouseDelay();
+    sampleSensors(&floodL, &floodF, &floodR);
     nextMove=getMoveFlood();
-    enableTimer(1);
-    enableTimer(2);
-
 
     temp = 0;
     temp2 = 0;
@@ -479,7 +464,7 @@ void updateMotorStates(void)
  *      Routine Functions
  *********************************************************************/ 
 inline void waitForStart(void){
-    while( sampleSensor(R90_SENSOR) < 300 );         // Wait for start input
+    while( sampleSensor(R90_SENSOR) < 400 );         // Wait for start input
 }
 inline void powerEmitters(int state){
 
@@ -548,7 +533,7 @@ void sampleAD(void)
 {
     // Actually sample
     AD1CON1bits.ADON = 1;
-    delayMicro(3);
+    delayMicro(20);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;

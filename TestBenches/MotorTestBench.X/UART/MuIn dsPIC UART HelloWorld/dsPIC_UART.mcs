@@ -1,0 +1,123 @@
+[Header]
+MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
+Version=1.0
+[File000]
+Location=E:\Documents and Settings\Administrator\Desktop\dsPIC30Fx_Hi-Tech_C_Hello_World\HelloWorld su UART\gen_init.o
+Folder=Intermediary
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g -Wall -Os
+TraceCmdString=
+DebugOptions=-D__DEBUG
+[File001]
+Location=E:\Documents and Settings\Administrator\Desktop\dsPIC30Fx_Hi-Tech_C_Hello_World\HelloWorld su UART\osc_init.o
+Folder=Intermediary
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g -Wall -Os
+TraceCmdString=
+DebugOptions=-D__DEBUG
+[File002]
+Location=E:\Documents and Settings\Administrator\Desktop\DSPIC33\HelloWorld su UART\main.o
+Folder=Intermediary
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g -Wall -Os
+TraceCmdString=
+DebugOptions=-D__DEBUG
+[File003]
+Location=E:\Documents and Settings\Administrator\Desktop\DSPIC33\HelloWorld su UART\gen_init.o
+Folder=Intermediary
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g -Wall -Os
+TraceCmdString=
+DebugOptions=-D__DEBUG
+[File004]
+Location=E:\Documents and Settings\Administrator\Desktop\DSPIC33\HelloWorld su UART\osc_init.o
+Folder=Intermediary
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g -Wall -Os
+TraceCmdString=
+DebugOptions=-D__DEBUG
+[File005]
+Location=E:\Documents and Settings\Administrator\Desktop\dsPIC30Fx_Hi-Tech_C_Hello_World\HelloWorld su UART\dsPIC_UART.cof
+Folder=Output
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1
+[File006]
+Location=E:\Documents and Settings\Administrator\Desktop\dsPIC30Fx_Hi-Tech_C_Hello_World\HelloWorld su UART\dsPIC_UART.hex
+Folder=Output
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1
+[File007]
+Location=E:\Documents and Settings\Administrator\Desktop\DSPIC33\HelloWorld su UART\dsPIC_UART.cof
+Folder=Output
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1
+[File008]
+Location=E:\Documents and Settings\Administrator\Desktop\DSPIC33\HelloWorld su UART\dsPIC_UART.hex
+Folder=Output
+DeviceName=dsPIC33FJ64GP802
+LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
+LanguageToolLocation=E:\Programmi\Microchip\MPLAB C30\bin\pic30-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|E:\Programmi\Microchip\MPLAB C30\include||$(LIBDIR)|E:\Programmi\Microchip\MPLAB C30\lib||$(LKRDIR)||
+SOLK=<src>|src\main.c|src\gen_init.c|src\osc_init.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1
+[TOOL_LOC_STAMPS]
+tool_loc{069BD372-6CA0-40D4-BF2F-5DC806D05083}=E:\Programmi\Microchip\MPLAB C30\bin\pic30-gcc.exe
+tool_loc{433C3D55-811D-409D-A6BF-159CF9355B42}=E:\Programmi\Microchip\MPLAB C30\bin\pic30-ld.exe
