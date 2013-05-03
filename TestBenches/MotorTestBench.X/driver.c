@@ -47,6 +47,8 @@ int floodF;
 Cell mouseMaze[16][16];
 Position mousePos;
 int algorithm;
+int destY;
+int destX;
 
 int main(void) {
     double k;
@@ -54,9 +56,11 @@ int main(void) {
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
+    destY = 7;
+    destX = 7;
 
     initRoutine();
-    FloodFill_initMaze();
+    FloodFill_initMaze(destY, destX);
 
     LATBbits.LATB13 = 1;                            // Disable Motors
     waitForStart();                                 // Wait for the start input
@@ -74,8 +78,14 @@ int main(void) {
     while(!isCenter(&mousePos)){
         executeMove(nextMove);
     }
-    algorithm = RIGHT_WALL_HUGGER;
-    turn360(1);
+    disableTimer(1);
+    disableTimer(2);
+    algorithm = FLOOD_FILL;
+    destX = 0;
+    destY = 0;
+    mouseDelay();
+    enableTimer(1);
+    enableTimer(2);
     while(!isStart(&mousePos)){
         executeMove(nextMove);
     }
@@ -719,7 +729,7 @@ void mapWalls(void){
 int getMoveFlood(void){
     floodMoveDone = FALSE;
     mapWalls();
-    FloodFill_floodMaze(); 
+    FloodFill_floodMaze(destY, destX); 
     floodMoveDone = TRUE;
     return globalToLocalDir(Maze_smallestNeighborDir(&mouseMaze[mousePos.y][mousePos.x]), mousePos.dir);
 }

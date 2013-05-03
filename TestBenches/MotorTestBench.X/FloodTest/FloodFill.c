@@ -106,7 +106,7 @@ void Maze_putWall(Cell maze[][16], int y, int x, int dir) {
 }
 
 // Init the maze
-void FloodFill_initMaze(void){
+void FloodFill_initMaze(int destX, int destY){
     int i = 0;
     int j = 0;
     int level = 0;
@@ -137,8 +137,8 @@ void FloodFill_initMaze(void){
     // initialize the maze with the correct flood values
     //printf("%d\n", &mouseMaze[7][7]);
 
-    tempCell = &mouseMaze[7][7];
-    StackPush(&currentLevel, &mouseMaze[7][7]);
+    tempCell = &mouseMaze[destY][destX];
+    StackPush(&currentLevel, &mouseMaze[destY][destX]);
 
     while(1){
         while(!StackIsEmpty(&currentLevel)) {
@@ -162,7 +162,7 @@ void FloodFill_initMaze(void){
     }
 }
 
-void FloodFill_floodMaze(void){
+void FloodFill_floodMaze(int destY, int destX){
     int i = 0;
     int j = 0;
     int level = 0;
@@ -177,8 +177,8 @@ void FloodFill_floodMaze(void){
         }
     }
 
-    tempCell = &mouseMaze[7][7];
-    StackPush(&currentLevel, &mouseMaze[7][7]);
+    tempCell = &mouseMaze[destY][destX];
+    StackPush(&currentLevel, &mouseMaze[destY][destX]);
 
     while(1){
         while(!StackIsEmpty(&currentLevel)) {

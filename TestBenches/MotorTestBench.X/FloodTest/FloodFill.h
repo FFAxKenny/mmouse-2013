@@ -20,10 +20,10 @@ extern StackA currentLevel;
 int Maze_smallestNeighborDir(Cell *c);
 void Maze_putWall(Cell maze[][16], int y, int x, int dir);
 void FloodFill_pushNeighbors(Cell *c);
-void FloodFill_initMaze(void);
+void FloodFill_initMaze(int destY, int destX);
 int FloodFill_checkWall(Cell *c, int d);
 void FloodFill_printMaze(void);
-void FloodFill_floodMaze(void);
+void FloodFill_floodMaze(int destY, int destX);
 int globalToLocalDir(int globalDir, int currDir);
 int localToGlobalDir(int localDir, int currDir);
 #endif
