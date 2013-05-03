@@ -303,15 +303,18 @@ void moveCell(int n)
             sample_flag = TRUE;
         }
 
+        // Sample Sensors and calculate the error
         sampleAllSensors();
-        if(right > 35) error = right - 150;
-        else if( left > 35 ) error = 150 - left;
+        if(right > 35) error = right - 60;
+        else if( left > 35 ) error = 60 - left;
         else error = 0;
 
+        // Discard the error if it is too low
         if(error < 0) tempError = -error;
         else tempError = error;
         if(tempError < 8) error = 0;
 
+        // Correct ever 2 step counts
         while( (lMotor.count - temp) < 2) {
             PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
             PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor prevError = error;
@@ -319,6 +322,8 @@ void moveCell(int n)
 
     }
 
+    // Increment the position and 
+    // then figure out what to do next
     Position_forwardCell(&mousePos);
     sampleSensors(&floodL, &floodF, &floodR);
     nextMove=getMoveFlood();
