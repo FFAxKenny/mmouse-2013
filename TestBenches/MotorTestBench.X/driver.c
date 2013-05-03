@@ -52,6 +52,8 @@ int algorithm;
 int destY;
 int destX;
 
+int timerBaseVal = 18000;
+
 int main(void) {
     double k;
     algorithm = FLOOD_FILL;
@@ -282,6 +284,17 @@ void alignToFront(void)
     disableTimer(2);
 }
 
+/* Change the PR values by given rate*/
+void accelerate(int rate, int finalValue) {
+    if( timerBaseVal > finalValue )
+        timerBaseVal -= rate;
+}
+
+/* Change the PR values by given rate*/
+void decelerate(int rate, int finalValue){
+    if( timerBaseVal < finalValue )
+        timerBaseVal +=rate;
+}
 
 
 
@@ -299,30 +312,13 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 250)
-    {
+    while( currentCellDist < CELL_DISTANCE && front < 250) {
 
-            /*
-            if(forward_flag == 1) {
-                accel = speedValue;
-            }
-            else if(currentCellDist < CELL_DISTANCE/2) {
-                // Accelerate
-                if(accel > speedValue) {
-                        accel -= 20;
-                }
-            }
-            else if(currentCellDist >= CELL_DISTANCE/2) {
-                // Decelearate
-                if(accel < speedValue) {
-                        accel += 20;
-                }
-            }
-            */
 
             currentCellDist = lMotor.count - temp2;
             temp = lMotor.count;
             sampleAllSensors();
+
 
             if(currentCellDist > (850) &&
                     sample_flag == FALSE) {
@@ -330,6 +326,11 @@ void moveCell(int n)
                 nextMove = getMove(algorithm);
                 sample_flag = TRUE;
             }
+
+            if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD)
+                decelerate(15,21000);
+            else
+                accelerate(4,13000);
 
             if(right > 25)
                 error = right - 60;
@@ -346,8 +347,8 @@ void moveCell(int n)
                 error = 0;
 
             while( (lMotor.count - temp) < 2) {
-                    PR1 = accel - error*pK -  (error-prevError)*pD;  // Left Motor
-                    PR2 = accel + error*pK + (error-prevError)*pD;  // Right Motor
+                    PR1 = timerBaseVal - error*pK -  (error-prevError)*pD;  // Left Motor
+                    PR2 = timerBaseVal + error*pK + (error-prevError)*pD;  // Right Motor
                     prevError = error;
             }
     }
@@ -370,6 +371,8 @@ void moveCell(int n)
         enableTimer(1);
         enableTimer(2);
         */
+        if( nextMove == RIGHT || nextMove == LEFT || nextMove == BACKWARD)
+            timerBaseVal = 18000;
 
 }
 int abs (int n) {
