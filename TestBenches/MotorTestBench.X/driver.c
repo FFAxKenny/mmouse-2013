@@ -267,13 +267,7 @@ void moveCell(int n)
             if(currentCellDist > (850) &&
                     sample_flag == FALSE) {
                 Position_forwardCell(&mousePos);
-                disableTimer(1);
-                disableTimer(2);
                 nextMove = getMove(algorithm);
-                enableTimer(1);
-                enableTimer(2);
-                    
-
                 sample_flag = TRUE;
             }
 
