@@ -15,57 +15,6 @@
 #include "config.h"
 #include "FloodFill.h"
 
-#define FLOOD_FILL 0
-#define LEFT_WALL_HUGGER 1
-#define RIGHT_WALL_HUGGER 2
-#define ALGORITHM 1
-
-// I forget what this does..something to do with clock
-#pragma config ICS = PGD2
-#pragma config FWDTEN = OFF             // Watchdog Timer Enable bit (Watchdog timer enabled/disabled by user software)
-
-// Configuration Options
-_FOSCSEL(FNOSC_FRC & IESO_OFF);                     // Select Oscillator
-_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);   // Some other stuff
-
-
-// Declare the motors
-Motor lMotor;
-Motor rMotor;
-
-int pK = 50;
-int pD = 250;
-int pKdefault = 50; 
-int pDdefault = 250;
-int savedpK;
-int savedpD;
-
-void mouseDelay(void);
-void alignToFront(void);
-
-double currentCellDist = 0;
-int forward_flag = 0;
-int nextMove = 0;
-int sample_flag = 0;
-int floodMoveDone = TRUE;
-
-int floodL;
-int floodR;
-int floodF;
-
-Cell mouseMaze[16][16];
-Position mousePos;
-int algorithm;
-int destY;
-int destX;
-
-int normalV = 20000;
-int timerBaseVal = 20000;
-int accelRate = 1;
-int decelRate = 1;
-int finalAccelV = 20000;
-int finalDecelV = 20000;
-
 int main(void) {
     double k;
     algorithm = FLOOD_FILL;
@@ -278,8 +227,6 @@ void sampleAllSensors(){
     right = tempRight/sampleNumber;
     front = tempFront/sampleNumber;
 }
-
-
 
 void mouseDelay(void) {
     __delay32(5000000);
