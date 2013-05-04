@@ -27,7 +27,7 @@ int main(void) {
     initRoutine();
     FloodFill_initMaze(destY, destX);
 
-    LATBbits.LATB13 = 1;                            // Disable Motors
+    powerMotors(OFF);
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
@@ -492,7 +492,7 @@ inline void powerEmitters(int state){
 
 }
 inline void powerMotors(int state){
-    LATBbits.LATB13 = 0;                            // Enable Motors
+    LATBbits.LATB13 = state;                            // Enable Motors
 }
 
 /*********************************************************************
