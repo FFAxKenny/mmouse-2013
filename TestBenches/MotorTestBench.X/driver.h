@@ -143,6 +143,7 @@ Position mousePos;
     /* Mouse Functions */
     void Mouse_setAlgorithm(int a );
     void Mouse_initPosition(void);
+    void Mouse_setDestCell(int y, int x);
 
 
 

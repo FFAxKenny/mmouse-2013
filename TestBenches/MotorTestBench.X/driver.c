@@ -18,16 +18,14 @@
 int main(void) {
     double k;
 
+    initRoutine();
+    powerMotors(OFF);
+
     Mouse_setAlgorithm(FLOOD_FILL);
     Mouse_initPosition();
-
-    destY = 7;
-    destX = 7;
-
-    initRoutine();
+    Mouse_setDestCell(7,7);
     FloodFill_initMaze(destY, destX);
 
-    powerMotors(OFF);
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
@@ -840,4 +838,8 @@ void Mouse_initPosition(void){
     mousePos.x = 0;
     mousePos.y = 0;
     mousePos.dir = NORTH;
+}
+void Mouse_setDestCell(int y, int x){
+    destY = y;
+    destX = x;
 }
