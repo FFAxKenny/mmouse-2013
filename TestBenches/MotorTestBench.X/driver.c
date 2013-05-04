@@ -15,6 +15,7 @@
 #include "config.h"
 #include "FloodFill.h"
 
+
 int main(void) {
     double k;
 
@@ -29,13 +30,13 @@ int main(void) {
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
+    powerMotors(ON);
     ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
-    powerMotors(ON);
     nextMove=getMove(algorithm);
     enableTimer(1);
     enableTimer(2);
-    while(!isCenter(&mousePos)){
+    while(!Mouse_isInCenterCell()){
         executeMove(nextMove);
     }
     disableTimer(1);
@@ -830,6 +831,11 @@ void Position_updateDirection(Position *mousePos, int turn) {
 
 }
 
+int Position_isInCell(Position *p, int y, int x) {
+    if( p->x == x && p->y == y) return TRUE;
+    else return FALSE;
+}
+
 void Mouse_setAlgorithm(int a) {
     algorithm = a;
 }
@@ -843,3 +849,11 @@ void Mouse_setDestCell(int y, int x){
     destY = y;
     destX = x;
 }
+
+int Mouse_isInCenterCell(void) {
+    return Position_isInCell(&mousePos,7,7);
+}
+int Mouse_isInStartCell(void) {
+    return Position_isInCell(&mousePos,0,0);
+}
+

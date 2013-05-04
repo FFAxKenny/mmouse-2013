@@ -34,6 +34,7 @@ Cell mouseMaze[16][16];
 StackA nextLevel;
 StackA currentLevel;
 
+
 typedef struct position{
     int x;
     int y;
@@ -127,7 +128,7 @@ Position mousePos;
     int getMove(int a);
     int abs(int n);
     void mouseDelay(void);
-        void alignToFront(void);
+    void alignToFront(void);
 
     /* FloodFill Moves */
     int getMoveFlood(void);
@@ -139,11 +140,16 @@ Position mousePos;
     /* Position Functions */
     void Position_forwardCell(Position *mousePos);
     void Position_updateDirection(Position *mousePos, int turn);
+    int Position_isInCell(Position *p, int y, int x);
 
     /* Mouse Functions */
-    void Mouse_setAlgorithm(int a );
+    void Mouse_setAlgorithm(int a);
     void Mouse_initPosition(void);
     void Mouse_setDestCell(int y, int x);
+    int Mouse_isInCenterCell(void);
+    int Mouse_isInStartCell(void);
+
+
 
 
 
