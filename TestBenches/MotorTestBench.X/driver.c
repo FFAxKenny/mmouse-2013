@@ -17,10 +17,10 @@
 
 int main(void) {
     double k;
-    algorithm = FLOOD_FILL;
-    mousePos.x = 0;
-    mousePos.y = 0;
-    mousePos.dir = NORTH;
+
+    Mouse_setAlgorithm(FLOOD_FILL);
+    Mouse_initPosition();
+
     destY = 7;
     destX = 7;
 
@@ -31,14 +31,12 @@ int main(void) {
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
-    ADC1BUF0 = 0;                                   // Clear the buffer sampleAllSensors();
+    ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
     powerMotors(ON);
     nextMove=getMove(algorithm);
-
     enableTimer(1);
     enableTimer(2);
-
     while(!isCenter(&mousePos)){
         executeMove(nextMove);
     }
@@ -834,3 +832,12 @@ void Position_updateDirection(Position *mousePos, int turn) {
 
 }
 
+void Mouse_setAlgorithm(int a) {
+    algorithm = a;
+}
+
+void Mouse_initPosition(void){
+    mousePos.x = 0;
+    mousePos.y = 0;
+    mousePos.dir = NORTH;
+}

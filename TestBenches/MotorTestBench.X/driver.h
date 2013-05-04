@@ -140,6 +140,10 @@ Position mousePos;
     void Position_forwardCell(Position *mousePos);
     void Position_updateDirection(Position *mousePos, int turn);
 
+    /* Mouse Functions */
+    void Mouse_setAlgorithm(int a );
+    void Mouse_initPosition(void);
+
 
 
 
