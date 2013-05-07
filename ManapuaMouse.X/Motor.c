@@ -1,4 +1,4 @@
-#include "motor.h"
+#include "Motor.h"
 void Motor_init(Motor *m)
 {
     m->step = 1;

@@ -6,13 +6,13 @@
 
 
 // User Created H Files
-#include "motor.h"
+#include "Motor.h"
 #include "pinconfig.h"
+#include "config.h"
 #include "driver.h"
 #include "tfdef.h"
 #include "dirdef.h"
 #include "Adc.h"
-#include "config.h"
 #include "FloodFill.h"
 
 int turnPR = 40000;
