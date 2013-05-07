@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1365738287 source:c:\sandbox\c\cstack\main.c
+	<stdio.h>
+	<stdlib.h>
+	"stack.h"
+
+1365738039 c:\sandbox\c\cstack\stack.h
+
+1365735662 source:c:\sandbox\c\cstack\stack.h
+
+1365738010 source:c:\sandbox\c\cstack\stack.c
+
