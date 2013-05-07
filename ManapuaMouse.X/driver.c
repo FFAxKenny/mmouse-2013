@@ -11,7 +11,7 @@
 #include "driver.h"
 #include "tfdef.h"
 #include "dirdef.h"
-#include "adc.h"
+#include "Adc.h"
 #include "config.h"
 #include "FloodFill.h"
 
