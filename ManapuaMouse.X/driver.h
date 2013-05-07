@@ -10,12 +10,10 @@
 // standard includes
 #include <stdio.h>
 #include <stdlib.h>
-#include <xc.h>
-#include <dsp.h>
-#include <p33Exxxx.h>
+#include "HardwareCommon.h"
 #include "FloodFill.h"
 #include "Cell.h"
-
+#include "adc.h"
 
 #define FLOOD_FILL 0
 #define LEFT_WALL_HUGGER 1
@@ -96,11 +94,9 @@ Position mousePos;
     void initRoutine(void);
     
     /* Analog to digital */
-    void sampleAD(void);
     void delayMicro(unsigned int delay);
 
     /* Sensor Functions */
-    int sampleSensor(int sensor);
     void allEmitters(int state);
     void powerEmitters(int state);
     void sampleAllSensors();

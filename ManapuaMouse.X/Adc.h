@@ -5,3 +5,7 @@
 #define R45_SENSOR  3
 #define F1_SENSOR   4
 #define F2_SENSOR   5
+#include "HardwareCommon.h"
+
+void sampleAD(void);
+int sampleSensor(int sensor);
