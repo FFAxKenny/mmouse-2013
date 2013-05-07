@@ -15,6 +15,8 @@
 #include "config.h"
 #include "FloodFill.h"
 
+int turnPR = 40000;
+int turnResetValue = 22000;
 
 int main(void) {
     double k;
@@ -70,6 +72,7 @@ int main(void) {
     int timerBaseVal = 18000;
 
     while(1){
+        turnPR = 22000;
         while(!isCenter(&mousePos)){
             executeMove(nextMove);
         }
@@ -114,7 +117,7 @@ int main(void) {
         //accelRate = 2;
         accelRate = accelRate + 1;
         finalAccelV = finalAccelV - 2000;
-        pK = pK;
+        pK = pK + 1;
         pD = pD + 10;
     }
 
@@ -132,19 +135,19 @@ void executeMove(int move) {
         case LEFT:
             forward_flag = 0;
             turn90(LEFT);
-            timerBaseVal = 20000;
+            timerBaseVal = turnResetValue;
             moveCell(1);
             break;
         case RIGHT:
             forward_flag = 0;
             turn90(RIGHT);
-            timerBaseVal = 20000;
+            timerBaseVal = turnResetValue;
             moveCell(1);
             break;
         case BACKWARD:
             forward_flag = 0;
             turn360(1);
-            timerBaseVal = 20000;
+            timerBaseVal = turnResetValue;
             moveCell(1);
             break;
         case FORWARD:
@@ -354,9 +357,9 @@ int abs (int n) {
 void turn90(int direction) {
     disableTimer(1);
     disableTimer(2);
-    __delay32(1000000);
-    PR1 = 25000;
-    PR2 = 25000;
+    __delay32(500000);
+    PR1 = turnPR;
+    PR2 = turnPR;
     if(direction == RIGHT){
         Position_updateDirection(&mousePos, RIGHT);
         rMotor.dir = 0;
@@ -375,18 +378,16 @@ void turn90(int direction) {
     disableTimer(2);
     lMotor.dir = 1;
     rMotor.dir = 1;
-    PR1= 16000;
-    PR2= 16000;
-    __delay32(1000000);
+    __delay32(500000);
     sampleAllSensors();
 }
 
 void turn360(int direction) {
     disableTimer(1);
     disableTimer(2);
-    __delay32(5000000);
-    PR1 = 25000;
-    PR2 = 25000;
+    __delay32(500000);
+    PR1 = turnPR;
+    PR2 = turnPR;
     lMotor.dir = 0;
     long temp = lMotor.count;
     while( (lMotor.count - temp) < DISTANCE_360)
@@ -398,9 +399,7 @@ void turn360(int direction) {
     disableTimer(1);
     disableTimer(2);
     lMotor.dir = 1;
-    __delay32(1000000);
-    PR1= 16000;
-    PR2= 16000;
+    __delay32(500000);
     sampleAllSensors();
 }
 
