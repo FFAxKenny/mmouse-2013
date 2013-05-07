@@ -27,11 +27,13 @@ int main(void) {
     Mouse_initPosition();
     Mouse_setDestCell(7,7);
     FloodFill_initMaze(destY, destX);
-    powerMotors(0);
+
+    powerMotors(1);
 
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
+    powerMotors(0);
     ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
     nextMove=getMove(algorithm);
