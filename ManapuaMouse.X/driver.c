@@ -28,12 +28,12 @@ int main(void) {
     Mouse_setDestCell(7,7);
     FloodFill_initMaze(destY, destX);
 
-    powerMotors(1);
+    powerMotors(OFF);
 
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
-    powerMotors(0);
+    powerMotors(ON);
     ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
     nextMove=getMove(algorithm);
@@ -481,6 +481,10 @@ inline void powerEmitters(int state){
 
 }
 inline void powerMotors(int state){
+    if(state == ON)
+        state = 0;
+    else 
+        state = 1;
     LATBbits.LATB13 = state;                            // Enable Motors
 }
 
