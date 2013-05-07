@@ -20,7 +20,6 @@ int main(void) {
     double k;
 
     initRoutine();
-    powerMotors(OFF);
 
     Mouse_setAlgorithm(FLOOD_FILL);
     Mouse_initPosition();
@@ -30,7 +29,7 @@ int main(void) {
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
 
-    powerMotors(ON);
+    powerMotors(0);
     ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
     nextMove=getMove(algorithm);
