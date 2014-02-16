@@ -66,6 +66,36 @@ void RawMaze_read(char rawMaze[rawMaze_height][rawMaze_width])
     }
 
 }
+
+void RawMaze_readFile(char rawMaze[rawMaze_height][rawMaze_width])
+{
+    int x=0;
+    int y=0;
+    char input;
+
+    FILE* mazeFile = fopen("maze.dat", "r");
+
+    if( mazeFile == NULL){
+        fprintf(stderr, "Can't open input file in.list!\n");
+        exit(1);
+    }
+
+    while( fscanf(mazeFile, "%c",&input) !=EOF){
+        if(input == '\n'){
+            y++;
+            x = 0;
+            printf("Row is now %d\n", y);
+        }
+        else{
+            rawMaze[y][x] = input;
+            printf("column is now %d\n", x);
+            x++;
+        }
+    }
+
+}
+
+
 void RawMaze_print(char rawMaze[rawMaze_height][rawMaze_width])
 {
     int i,j;

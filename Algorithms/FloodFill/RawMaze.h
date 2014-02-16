@@ -6,6 +6,7 @@
 #define rawW 65
 #define RAWH 33
 #define RAWW 65
+#include <stdlib.h>
 
 void RawMaze_readRawMaze(char rawMaze[rawMaze_height][rawMaze_width]);
 void RawMaze_printRawMaze(char rawMaze[rawMaze_height][rawMaze_width]);
@@ -14,6 +15,7 @@ int RawMaze_checkRawNorth(char rawmaze[rawH][rawW], int x, int y);
 int RawMaze_checkRawSouth(char rawmaze[rawH][rawW], int x, int y);
 int RawMaze_checkRawEast(char rawmaze[rawH][rawW], int x, int y);
 int RawMaze_checkRawWest(char rawmaze[rawH][rawW], int x, int y);
+void RawMaze_readFile(char rawMaze[rawH][rawW]);
 
 int RawMaze_rawToMazeX(int rawX);
 int RawMaze_rawToMazeY(int rawY);
