@@ -4,7 +4,17 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>Adc.h</itemPath>
+      <itemPath>Cell.h</itemPath>
+      <itemPath>FloodFill.h</itemPath>
+      <itemPath>HardwareCommon.h</itemPath>
+      <itemPath>Motor.h</itemPath>
+      <itemPath>dirdef.h</itemPath>
       <itemPath>driver.h</itemPath>
+      <itemPath>pinconfig.h</itemPath>
+      <itemPath>stack.h</itemPath>
+      <itemPath>stackA.h</itemPath>
+      <itemPath>tfdef.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -13,7 +23,12 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>Adc.c</itemPath>
+      <itemPath>FloodFill.c</itemPath>
+      <itemPath>Motor.c</itemPath>
       <itemPath>driver.c</itemPath>
+      <itemPath>stack.c</itemPath>
+      <itemPath>stackA.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -21,6 +36,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>FloodTest</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -32,7 +50,7 @@
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.21</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>2</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
