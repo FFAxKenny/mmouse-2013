@@ -1,6 +1,6 @@
 dist
 build
-nbproject
+# nbproject
 # Object files
 *.o
 
