@@ -15,6 +15,7 @@
 #include "Adc.h"
 #include "FloodFill.h"
 
+int baseTurnPR = 40000;
 int turnPR = 40000;
 int turnResetValue = 22000;
 
@@ -37,17 +38,25 @@ int main(void) {
     ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
 
     nextMove=getMove(algorithm);
+
     enableTimer(1);
     enableTimer(2);
+    
+    // If the mouse isn't in the center
     while(!Mouse_isInCenterCell()){
         executeMove(nextMove);
     }
+
+    // Reset the flood fille and 
+    // navigate to the start cell
     disableTimer(1);
     disableTimer(2);
+
     algorithm = FLOOD_FILL;
     destX = 0;
     destY = 0;
     mouseDelay();
+
     enableTimer(1);
     enableTimer(2);
 
@@ -55,38 +64,58 @@ int main(void) {
         executeMove(nextMove);
     }
 
+
+    // Speed Run
+
+    // Disable the motors
     disableTimer(1);
     disableTimer(2);
+
     algorithm = FLOOD_FILL;
     destX = 7;
     destY = 7;
     mouseDelay();
-    enableTimer(1);
-    enableTimer(2);
+
 
     accelRate = 10;
     finalAccelV = 16000;
     decelRate = 50;
     finalDecelV = 20000;
+
+    // Re-enable the motors again 
+    enableTimer(1);
+    enableTimer(2);
+
     int savedAccelRate;
     int savedFinalAccelV;
+    int savedTurnValue;
 
     int timerBaseVal = 18000;
 
     while(1){
         turnPR = 22000;
+
+        // Move back to the center
         while(!isCenter(&mousePos)){
             executeMove(nextMove);
         }
 
+        // Disable the motors
+        disableTimer(1);
+        disableTimer(2);
+
         // save the last acceleration values
+        // that way, we can go back to the start
+        // cell without rushing things
+        savedTurnValue = turnPR;
         savedAccelRate = accelRate;
         savedFinalAccelV = finalAccelV;
         savedpK = pK;
         savedpD = pD;
 
-        disableTimer(1);
-        disableTimer(2);
+        turnPR = baseTurnPR;
+
+
         algorithm = FLOOD_FILL;
         destX = 0;
         destY = 0;
@@ -95,32 +124,46 @@ int main(void) {
         pD = pDdefault;
         timerBaseVal = normalV;
         mouseDelay();
+
+        // Enable the motors
         enableTimer(1);
         enableTimer(2);
 
+        // Move back to the start position
         while(!isStart(&mousePos)){
             executeMove(nextMove);
         }
 
+        // Disable the timers
+        disableTimer(1);
+        disableTimer(2);
+
+        mouseDelay();
+
+        // Restore our values to begin the speed run back!
         accelRate = savedAccelRate;
         finalAccelV = savedFinalAccelV;
         pK = savedpK;
         pD = savedpD;
+        turnPR = savedTurnValue;
 
-        disableTimer(1);
-        disableTimer(2);
         algorithm = FLOOD_FILL;
         destX = 7;
         destY = 7;
         mouseDelay();
+
+        // accelRate = 2;
+        // Change the acceleration values (for the speed run)
+        // and tweak the controller values
+        accelRate = accelRate + 1;
+        finalAccelV = finalAccelV - 2500;
+        pK = pK + 1;
+        pD = pD + 12;
+
+        // Re-enable our timers!
         enableTimer(1);
         enableTimer(2);
     
-        //accelRate = 2;
-        accelRate = accelRate + 1;
-        finalAccelV = finalAccelV - 2000;
-        pK = pK + 1;
-        pD = pD + 10;
     }
 
     while(!isStart(&mousePos)){
@@ -311,8 +354,8 @@ void moveCell(int n)
 
             if(right > 25)
                 error = right - 55;
-            else if( left > 20)
-                error = 55 - left;
+            else if( left > 25)
+                error = 60 - left;
             else
                 error = 0;
 

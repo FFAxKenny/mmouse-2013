@@ -53,7 +53,7 @@ Position mousePos;
     int sample_flag = 0;
     int floodMoveDone = TRUE;
 
-    int pK = 50;
+    int pK = 60;
     int pD = 250;
     int pKdefault = 50; 
     int pDdefault = 250;
