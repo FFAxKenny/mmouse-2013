@@ -53,10 +53,10 @@ Position mousePos;
     int sample_flag = 0;
     int floodMoveDone = TRUE;
 
-    int pK = 5;
-    int pD = 25;
-    int pKdefault = 5; 
-    int pDdefault = 25;
+    int pK = 25;
+    int pD = 60;
+    int pKdefault = 25; 
+    int pDdefault = 60;
     int savedpK;
     int savedpD;
 
@@ -77,12 +77,12 @@ Position mousePos;
     int slowSpeedValue = 18000;
     int fastSpeedValue = 18000;
 
-    int normalV = 20000;
-    int timerBaseVal = 20000;
-    int accelRate = 1;
-    int decelRate = 1;
-    int finalAccelV = 20000;
-    int finalDecelV = 20000;
+    int normalV = 18000;
+    int timerBaseVal = 18000;
+    int accelRate = 5;
+    int decelRate = 5;
+    int finalAccelV = 18000;
+    int finalDecelV = 18000;
 
     /* Init Routines */
     void initAD(void);

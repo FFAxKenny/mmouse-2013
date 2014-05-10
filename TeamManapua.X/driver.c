@@ -15,10 +15,12 @@
 #include "Adc.h"
 #include "FloodFill.h"
 
-// #define DEBUG_MODE
+//#define DEBUG_MODE
 
 int turnPR = 40000;
-int turnResetValue = 22000;
+int turnResetValue = 30000;
+int nominal_right = 0;
+int nominal_left = 0;
 
 int main(void) {
     double k;
@@ -32,12 +34,17 @@ int main(void) {
     }
     #endif
 
+    sampleAllSensors();
+    left = nominal_left;
+    right = nominal_right;
+
     Mouse_setAlgorithm(FLOOD_FILL);
     Mouse_initPosition();
     Mouse_setDestCell(7,7);
     FloodFill_initMaze(destY, destX);
 
     powerMotors(OFF);
+
 
     waitForStart();                                 // Wait for the start input
     for(k = 0; k< 150000; k++);                     // Delay the start
@@ -48,6 +55,7 @@ int main(void) {
     nextMove=getMove(algorithm);
     enableTimer(1);
     enableTimer(2);
+
     while(!Mouse_isInCenterCell()){
         executeMove(nextMove);
     }
@@ -320,10 +328,10 @@ void moveCell(int n)
             else
                 accelerate(accelRate, finalAccelV);
 
-            if(right > 150)
-                error = right - 200;
-            else if( left > 150)
-                error = 200 - left;
+            if(right > 100)
+                error = right - NOMINAL_RIGHT_VALUE;
+            else if( left > 100)
+                error = NOMINAL_LEFT_VALUE - left;
             else
                 error = 0;
 
@@ -331,7 +339,8 @@ void moveCell(int n)
                 tempError = -error;
             else
                 tempError = error;
-            if(tempError < 5)
+
+            if(tempError < 7)
                 error = 0;
 
             while( (lMotor.count - temp) < 2) {

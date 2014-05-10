@@ -10,8 +10,8 @@
 #define RIGHT_THRESHOLD         110
 #define LEFT_THRESHOLD          110
 #define FRONT_THRESHOLD         50
-#define NOMINAL_RIGHT_VALUE     200
-#define NOMINAL_LEFT_VALUE      200
+#define NOMINAL_RIGHT_VALUE     210
+#define NOMINAL_LEFT_VALUE      260
 
 
 
