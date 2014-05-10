@@ -15,6 +15,8 @@
 #include "Adc.h"
 #include "FloodFill.h"
 
+// #define DEBUG_MODE
+
 int turnPR = 40000;
 int turnResetValue = 22000;
 
@@ -22,6 +24,13 @@ int main(void) {
     double k;
 
     initRoutine();
+
+    #ifdef DEBUG_MODE
+    ADC1BUF0 = 0;            // Clear the buffer sampleAllSensors();
+    while(1){
+        sampleAllSensors();
+    }
+    #endif
 
     Mouse_setAlgorithm(FLOOD_FILL);
     Mouse_initPosition();
@@ -129,7 +138,10 @@ int main(void) {
 
     disableTimer(1);
     disableTimer(2);
-    while(1);
+    while(1){
+        disableTimer(1);
+        disableTimer(2);
+    }
 }
 
 void executeMove(int move) {
@@ -177,7 +189,6 @@ int getMove(int a){
                 }
                 // if front is closed
                 else {
-                    // if right is open
                     if(right < RIGHT_THRESHOLD)
                         return RIGHT;
                     // if right is closed
@@ -291,7 +302,7 @@ void moveCell(int n)
     temp2 = lMotor.count;
     currentCellDist = lMotor.count - temp2;
 
-    while( currentCellDist < CELL_DISTANCE && front < 300) {
+    while( currentCellDist < CELL_DISTANCE && front < 600) {
             currentCellDist = lMotor.count - temp2;
             temp = lMotor.count;
             sampleAllSensors();
@@ -309,10 +320,10 @@ void moveCell(int n)
             else
                 accelerate(accelRate, finalAccelV);
 
-            if(right > 25)
-                error = right - 55;
-            else if( left > 20)
-                error = 55 - left;
+            if(right > 150)
+                error = right - 200;
+            else if( left > 150)
+                error = 200 - left;
             else
                 error = 0;
 

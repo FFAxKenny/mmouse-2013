@@ -15,6 +15,7 @@ int sampleSensor(int sensor) {
         case F1_SENSOR:
             AD1CHS0 = 0x0002;               
             __PIN_EmitF1 = 1;
+            delayMicro(10);
             AD1CON1bits.ADON = 1;
             sampleAD();
             __PIN_EmitF1 = 0;
@@ -56,7 +57,7 @@ int sampleSensor(int sensor) {
 
 void sampleAD(void) {
     AD1CON1bits.ADON = 1;
-    delayMicro(3);
+    delayMicro(25);
     AD1CON1bits.SAMP = 0;
     while (!AD1CON1bits.DONE);
     AD1CON1bits.DONE = 0;
